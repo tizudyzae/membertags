@@ -254,7 +254,7 @@
         height: 100%;
         display: grid;
         grid-template-columns: repeat(2, var(--tag-width));
-        grid-template-rows: repeat(5, var(--tag-height));
+        grid-auto-rows: var(--tag-height);
         column-gap: var(--column-gap);
         row-gap: var(--row-gap);
         justify-content: center;
@@ -413,7 +413,7 @@
     ></script>
     <script>
       (function () {
-        const TAG_COUNT = 10;
+        const TAG_COUNT = 7;
         const placeholders = {
           price: '£0.00',
           unitPrice: '£0.00',
