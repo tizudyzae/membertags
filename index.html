@@ -6,20 +6,26 @@
     <title>Members Price Tag Generator</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Montserrat:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <style>
       :root {
         --page-width: 21cm;
         --page-height: 29.7cm;
-        --page-padding-top: 1.3cm;
-        --page-padding-right: 0.75cm;
-        --page-padding-bottom: 1.3cm;
-        --page-padding-left: 0.75cm;
-        --column-gap: 0.4cm;
-        --row-gap: 0.3cm;
-        --tag-bg: #080808;
+        --page-padding-top: 1.35cm;
+        --page-padding-right: 1.05cm;
+        --page-padding-bottom: 1.35cm;
+        --page-padding-left: 1.05cm;
+        --column-gap: 0.7cm;
+        --row-gap: 0.6cm;
+        --tag-width: 9cm;
+        --tag-height: 4.8cm;
+        --tag-bg: #050505;
         --tag-text: #ffffff;
-        --pill-bg: #f2c94c;
+        --pill-bg: #ffffff;
+        --pill-text: #111827;
         --body-font: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
         --display-font: 'Barlow Condensed', 'Impact', sans-serif;
       }
@@ -33,28 +39,28 @@
       body {
         margin: 0;
         font-family: var(--body-font);
-        background: #f4f5f8;
-        color: #1f2937;
+        background: #f3f4f6;
+        color: #111827;
         min-height: 100vh;
         display: flex;
         flex-direction: column;
       }
 
       header {
-        background: #101010;
+        background: #0f172a;
         color: #ffffff;
-        padding: 1.75rem 2.5rem;
+        padding: 1.5rem 2.5rem;
         font-weight: 700;
         letter-spacing: 0.12em;
         text-transform: uppercase;
         font-size: 1.1rem;
-        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.25);
+        box-shadow: 0 18px 40px rgba(15, 23, 42, 0.24);
       }
 
       main {
         flex: 1;
         display: grid;
-        grid-template-columns: minmax(320px, 420px) 1fr;
+        grid-template-columns: minmax(320px, 380px) 1fr;
         gap: 2rem;
         padding: 2rem 2.5rem 3rem;
         align-items: flex-start;
@@ -79,7 +85,7 @@
       .controls {
         background: #ffffff;
         border-radius: 18px;
-        box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.18);
+        box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.22);
         padding: 1.75rem;
         display: flex;
         flex-direction: column;
@@ -95,100 +101,82 @@
       }
 
       .controls h2 {
-        margin: 0 0 0.75rem;
-        font-size: 1.1rem;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
-      }
-
-      fieldset {
         margin: 0;
-        padding: 0;
-        border: none;
-        display: grid;
-        gap: 1rem;
-      }
-
-      .field {
-        display: grid;
-        gap: 0.35rem;
-      }
-
-      .field-inline {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-        gap: 0.75rem;
-      }
-
-      label {
-        font-size: 0.78rem;
-        font-weight: 600;
-        text-transform: uppercase;
+        font-size: 1.05rem;
         letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .control-note {
+        margin: 0;
+        font-size: 0.85rem;
+        line-height: 1.5;
         color: #4b5563;
       }
 
-      input[type='text'],
-      input[type='number'],
-      textarea,
-      select {
+      .entries-table-wrapper {
+        border: 1px solid #e5e7eb;
+        border-radius: 14px;
+        overflow: hidden;
+      }
+
+      .entries-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+      }
+
+      .entries-table th,
+      .entries-table td {
+        border-right: 1px solid #e5e7eb;
+        border-bottom: 1px solid #e5e7eb;
+        padding: 0.5rem 0.6rem;
+        background: #ffffff;
+        vertical-align: top;
+      }
+
+      .entries-table th:last-child,
+      .entries-table td:last-child {
+        border-right: none;
+      }
+
+      .entries-table tbody tr:last-child td {
+        border-bottom: none;
+      }
+
+      .entries-table th {
+        background: #f3f4f6;
+        font-size: 0.75rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #4b5563;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+      }
+
+      .entries-table td:first-child,
+      .entries-table th:first-child {
+        text-align: center;
+        width: 2.2rem;
+        font-weight: 700;
+      }
+
+      .entries-table input[type='text'] {
         width: 100%;
         border-radius: 10px;
-        border: 1px solid #d0d7e2;
+        border: 1px solid #d1d5db;
         background: #ffffff;
-        padding: 0.55rem 0.7rem;
+        padding: 0.45rem 0.55rem;
         font-family: inherit;
-        font-size: 0.92rem;
+        font-size: 0.9rem;
         transition: border-color 0.2s ease, box-shadow 0.2s ease;
       }
 
-      input[type='text']:focus,
-      input[type='number']:focus,
-      textarea:focus,
-      select:focus {
+      .entries-table input[type='text']:focus {
         outline: none;
         border-color: #2563eb;
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
-      }
-
-      textarea {
-        resize: vertical;
-        min-height: 2.4rem;
-      }
-
-      .layout-inputs {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 0.75rem;
-      }
-
-      .checkbox-row {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-size: 0.85rem;
-        color: #374151;
-      }
-
-      .checkbox-row input[type='checkbox'] {
-        width: auto;
-        height: auto;
-        margin: 0;
-      }
-
-      .csv-import {
-        background: #f9fafb;
-        border-radius: 14px;
-        padding: 1rem;
-        display: grid;
-        gap: 0.75rem;
-        border: 1px solid #e5e7eb;
-      }
-
-      .csv-help {
-        font-size: 0.78rem;
-        line-height: 1.4;
-        color: #4b5563;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
       }
 
       .actions {
@@ -211,11 +199,6 @@
         color: #ffffff;
       }
 
-      button:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 15px 25px -15px rgba(15, 23, 42, 0.45);
-      }
-
       button.secondary {
         background: #e5e7eb;
         color: #111827;
@@ -225,72 +208,16 @@
         background: #2563eb;
       }
 
+      button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 15px 25px -15px rgba(15, 23, 42, 0.45);
+      }
+
       button:disabled {
         opacity: 0.5;
         cursor: not-allowed;
         box-shadow: none;
         transform: none;
-      }
-
-      .entries-table-wrapper {
-        border: 1px solid #e5e7eb;
-        border-radius: 14px;
-        overflow: hidden;
-        max-height: 430px;
-      }
-
-      .entries-table {
-        width: 100%;
-        min-width: 620px;
-        border-collapse: separate;
-        border-spacing: 0;
-      }
-
-      .entries-table th,
-      .entries-table td {
-        border-right: 1px solid #e5e7eb;
-        border-bottom: 1px solid #e5e7eb;
-        padding: 0.4rem 0.5rem;
-        vertical-align: top;
-        background: #ffffff;
-      }
-
-      .entries-table th:last-child,
-      .entries-table td:last-child {
-        border-right: none;
-      }
-
-      .entries-table tbody tr:last-child td {
-        border-bottom: none;
-      }
-
-      .entries-table th {
-        background: #f3f4f6;
-        font-size: 0.72rem;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        color: #4b5563;
-        position: sticky;
-        top: 0;
-        z-index: 1;
-      }
-
-      .entries-table td:first-child,
-      .entries-table th:first-child {
-        text-align: center;
-        width: 2.2rem;
-        font-weight: 700;
-      }
-
-      .entries-table input,
-      .entries-table textarea {
-        font-size: 0.82rem;
-        border-radius: 8px;
-        padding: 0.4rem 0.55rem;
-      }
-
-      .entries-table textarea {
-        min-height: 2.2rem;
       }
 
       .preview-wrapper {
@@ -326,8 +253,8 @@
         width: 100%;
         height: 100%;
         display: grid;
-        grid-template-columns: repeat(2, 10.5cm);
-        grid-template-rows: repeat(7, 3.7cm);
+        grid-template-columns: repeat(2, var(--tag-width));
+        grid-template-rows: repeat(5, var(--tag-height));
         column-gap: var(--column-gap);
         row-gap: var(--row-gap);
         justify-content: center;
@@ -335,188 +262,76 @@
       }
 
       .label {
-        width: 10.5cm;
-        height: 3.7cm;
+        width: var(--tag-width);
+        height: var(--tag-height);
         display: flex;
       }
 
       .label-card {
         background: var(--tag-bg);
         color: var(--tag-text);
-        border-radius: 0.35cm;
-        padding: 0.32cm 0.45cm 0.35cm;
+        border-radius: 0.38cm;
+        padding: 0.45cm 0.55cm 0.5cm;
         display: flex;
         flex-direction: column;
         width: 100%;
-        position: relative;
-        overflow: hidden;
+        height: 100%;
       }
 
-      .label-top {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        gap: 0.45cm;
-      }
-
-      .unit-text {
-        font-size: 0.34cm;
+      .tag-heading {
+        font-size: 0.95cm;
         letter-spacing: 0.08em;
         text-transform: uppercase;
-        color: rgba(255, 255, 255, 0.85);
+        font-weight: 700;
+        line-height: 1;
+      }
+
+      .price {
+        margin-top: 0.32cm;
+        font-family: var(--display-font);
+        font-size: 2.05cm;
+        line-height: 1;
+        font-weight: 800;
+        letter-spacing: 0.01em;
+      }
+
+      .unit-line {
+        margin-top: 0.22cm;
+        font-size: 0.55cm;
+        letter-spacing: 0.03em;
         font-weight: 600;
+        color: rgba(255, 255, 255, 0.9);
+        display: flex;
+        gap: 0.2cm;
       }
 
-      .unit-text.is-placeholder {
-        opacity: 0.35;
-      }
-
-      .unit-text.is-placeholder::after,
-      .product-name.is-placeholder::after,
-      .note-text.is-placeholder::after {
-        content: attr(data-placeholder);
-        display: block;
-      }
-
-      .product-name.is-placeholder,
-      .note-text.is-placeholder {
-        opacity: 0.3;
-      }
-
-      .note-text.is-placeholder {
-        opacity: 0.25;
+      .unit-separator {
+        text-transform: lowercase;
       }
 
       .expiry-pill {
-        background: var(--pill-bg);
-        color: #18181b;
-        border-radius: 999px;
-        padding: 0.1cm 0.35cm;
-        font-size: 0.32cm;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        white-space: nowrap;
-        display: flex;
-        gap: 0.15cm;
-        align-items: center;
-      }
-
-      .expiry-pill .expiry-date {
-        font-weight: 700;
-      }
-
-      .expiry-pill.is-placeholder {
-        opacity: 0.55;
-      }
-
-      .expiry-pill.is-placeholder .expiry-date::after {
-        content: attr(data-placeholder);
-      }
-
-      .tag-title {
-        margin-top: 0.18cm;
-        font-size: 0.6cm;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        font-weight: 700;
-      }
-
-      .price-line {
-        margin-top: 0.22cm;
-        display: flex;
-        align-items: flex-end;
-        gap: 0.06cm;
-        font-family: var(--display-font);
-        line-height: 1;
-        min-height: 1.9cm;
-        position: relative;
-      }
-
-      .price-line.is-placeholder {
-        color: rgba(255, 255, 255, 0.2);
-      }
-
-      .price-line.is-placeholder::after {
-        content: attr(data-placeholder);
-        position: absolute;
-        left: 0;
-        bottom: 0;
-        font-size: 1.9cm;
-        font-weight: 800;
-        letter-spacing: -0.04em;
-        color: rgba(255, 255, 255, 0.25);
-      }
-
-      .price-line.is-placeholder .price-currency,
-      .price-line.is-placeholder .price-major,
-      .price-line.is-placeholder .price-minor,
-      .price-line.is-placeholder .price-suffix {
-        visibility: hidden;
-      }
-
-      .price-currency {
-        font-size: 1.1cm;
-        font-weight: 700;
-        margin-right: 0.08cm;
-      }
-
-      .price-major {
-        font-size: 2.1cm;
-        font-weight: 800;
-        letter-spacing: -0.04em;
-      }
-
-      .price-minor {
-        font-size: 1.2cm;
-        font-weight: 700;
-        align-self: flex-end;
-        margin-bottom: 0.12cm;
-      }
-
-      .price-suffix {
-        font-size: 0.75cm;
-        font-weight: 700;
-        margin-left: 0.08cm;
-        align-self: flex-end;
-        letter-spacing: 0.05em;
-      }
-
-      .price-line[data-has-minor='false'] .price-minor {
-        display: none;
-      }
-
-      .price-line[data-has-suffix='false'] .price-suffix {
-        display: none;
-      }
-
-      .product-name {
-        margin-top: 0.3cm;
-        font-size: 0.46cm;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        line-height: 1.2;
-        white-space: pre-line;
-      }
-
-      .note-text {
         margin-top: auto;
-        font-size: 0.34cm;
-        letter-spacing: 0.1em;
+        align-self: flex-start;
+        background: var(--pill-bg);
+        color: var(--pill-text);
+        border-radius: 999px;
+        padding: 0.2cm 0.6cm;
+        font-size: 0.48cm;
+        font-weight: 700;
+        letter-spacing: 0.05em;
         text-transform: uppercase;
-        color: rgba(255, 255, 255, 0.75);
-        font-weight: 600;
-        white-space: pre-line;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25cm;
       }
 
-      body.show-guides .label {
-        outline: 1px dashed rgba(79, 70, 229, 0.55);
-      }
-
-      body.show-guides .preview-page::after {
-        border-color: rgba(79, 70, 229, 0.45);
-        border-style: dashed;
+      .price[data-empty='true'],
+      .unit-line[data-empty='true'],
+      .unit-price[data-empty='true'],
+      .unit-text[data-empty='true'],
+      .expiry-pill[data-empty='true'],
+      .expiry-date[data-empty='true'] {
+        opacity: 0.45;
       }
 
       @page {
@@ -528,30 +343,27 @@
         body {
           background: #ffffff;
         }
+
         header,
         .controls {
           display: none !important;
         }
+
         main {
           display: block;
           padding: 0;
         }
+
         .preview-wrapper {
           margin: 0;
           justify-content: flex-start;
         }
+
         .preview-page {
           box-shadow: none;
           margin: 0;
           width: var(--page-width);
           height: var(--page-height);
-        }
-        .unit-text.is-placeholder::after,
-        .product-name.is-placeholder::after,
-        .note-text.is-placeholder::after,
-        .expiry-pill.is-placeholder .expiry-date::after,
-        .price-line.is-placeholder::after {
-          content: '';
         }
       }
     </style>
@@ -561,88 +373,24 @@
     <main>
       <section class="controls" aria-label="Tag controls">
         <div>
-          <h2>General settings</h2>
-          <fieldset>
-            <div class="field">
-              <label for="headingInput">Tag heading</label>
-              <input id="headingInput" type="text" value="Members Price" autocomplete="off" />
-            </div>
-            <div class="field-inline">
-              <div class="field">
-                <label for="currencyInput">Currency symbol</label>
-                <input id="currencyInput" type="text" value="£" maxlength="3" autocomplete="off" />
-              </div>
-              <div class="field">
-                <label for="expiryLabelInput">Expiry label</label>
-                <input id="expiryLabelInput" type="text" value="Expires" autocomplete="off" />
-              </div>
-            </div>
-            <label class="checkbox-row">
-              <input type="checkbox" id="showGuides" />
-              Show layout guides
-            </label>
-          </fieldset>
-        </div>
-        <div>
-          <h2>Margins & spacing (cm)</h2>
-          <fieldset class="layout-inputs">
-            <div class="field">
-              <label for="topMargin">Top margin</label>
-              <input id="topMargin" type="number" step="0.1" min="0" value="1.3" data-css-var="--page-padding-top" data-unit="cm" />
-            </div>
-            <div class="field">
-              <label for="bottomMargin">Bottom margin</label>
-              <input id="bottomMargin" type="number" step="0.1" min="0" value="1.3" data-css-var="--page-padding-bottom" data-unit="cm" />
-            </div>
-            <div class="field">
-              <label for="leftMargin">Left margin</label>
-              <input id="leftMargin" type="number" step="0.1" min="0" value="0.75" data-css-var="--page-padding-left" data-unit="cm" />
-            </div>
-            <div class="field">
-              <label for="rightMargin">Right margin</label>
-              <input id="rightMargin" type="number" step="0.1" min="0" value="0.75" data-css-var="--page-padding-right" data-unit="cm" />
-            </div>
-            <div class="field">
-              <label for="columnGap">Horizontal gap</label>
-              <input id="columnGap" type="number" step="0.1" min="0" value="0.4" data-css-var="--column-gap" data-unit="cm" />
-            </div>
-            <div class="field">
-              <label for="rowGap">Vertical gap</label>
-              <input id="rowGap" type="number" step="0.1" min="0" value="0.3" data-css-var="--row-gap" data-unit="cm" />
-            </div>
-          </fieldset>
-        </div>
-        <div class="csv-import">
-          <div class="field">
-            <label for="csvInput">Import CSV</label>
-            <input type="file" id="csvInput" accept=".csv" />
-          </div>
-          <label class="checkbox-row">
-            <input type="checkbox" id="csvHasHeader" checked />
-            CSV includes header row
-          </label>
-          <p class="csv-help">
-            The importer expects up to 14 rows with the following columns: product name, price, price suffix (optional), unit price text, expiry text, and an optional note.
+          <h2>Tag entries</h2>
+          <p class="control-note">
+            Enter the price, unit price, unit, and end date for each tag. The layout of every tag matches the provided mock-up.
           </p>
         </div>
-        <div>
-          <h2>Tag entries</h2>
-          <div class="entries-table-wrapper">
-            <table class="entries-table">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Product name</th>
-                  <th>Price</th>
-                  <th>Suffix</th>
-                  <th>Unit price text</th>
-                  <th>Expiry</th>
-                  <th>Note</th>
-                </tr>
-              </thead>
-              <tbody id="entriesBody"></tbody>
-            </table>
-          </div>
+        <div class="entries-table-wrapper">
+          <table class="entries-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Price</th>
+                <th>Unit price</th>
+                <th>Unit</th>
+                <th>End date</th>
+              </tr>
+            </thead>
+            <tbody id="entriesBody"></tbody>
+          </table>
         </div>
         <div class="actions">
           <button type="button" class="secondary" id="copyFirst">Copy first row to all</button>
@@ -657,84 +405,65 @@
         </div>
       </section>
     </main>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-YcsIPyk2SGlu1qQEbfXDnpa9eKJeNEqXWiwxupCSvJzpuG1HsfrNcrediOYM/qfNwCuWHa3gwPrmT2yEaE+Fw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"
+      integrity="sha512-YcsIPyk2SGLu1qQEbfXDnpa9eKJeNEqXWiwxupCSvJzpuG1HsfrNcrediOYM/qfNwCuWHa3gwPrmT2yEaE+Fw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
     <script>
       (function () {
-        const TAG_COUNT = 14;
+        const TAG_COUNT = 10;
         const placeholders = {
-          productName: 'Product name',
-          unitPrice: '£2.38 per 100g',
-          note: 'Optional note',
-          expiry: 'DD/MM/YYYY',
-        };
-
-        const headingInput = document.getElementById('headingInput');
-        const currencyInput = document.getElementById('currencyInput');
-        const expiryLabelInput = document.getElementById('expiryLabelInput');
-
-        const globalSettings = {
-          heading: headingInput.value.trim(),
-          currencySymbol: currencyInput.value,
-          expiryLabel: expiryLabelInput.value.trim(),
+          price: '£0.00',
+          unitPrice: '£0.00',
+          unit: '100g',
+          endDate: 'DD/MM/YYYY',
         };
 
         const tagData = Array.from({ length: TAG_COUNT }, () => ({
-          productName: '',
           price: '',
-          priceSuffix: '',
           unitPrice: '',
-          expiry: '',
-          note: '',
+          unit: '',
+          endDate: '',
         }));
 
         const labelGrid = document.getElementById('labelGrid');
-        const labelElements = [];
+        const labelRefs = [];
 
-        function createLabel() {
+        function createLabel(index) {
           const label = document.createElement('div');
           label.className = 'label';
           label.innerHTML = `
             <div class="label-card">
-              <div class="label-top">
-                <div class="unit-text is-placeholder" data-role="unit"></div>
-                <div class="expiry-pill is-placeholder" data-role="expiry">
-                  <span class="expiry-label">${globalSettings.expiryLabel || 'Expires'}</span>
-                  <span class="expiry-date"></span>
-                </div>
+              <div class="tag-heading">Members Price</div>
+              <div class="price" data-role="price">${placeholders.price}</div>
+              <div class="unit-line" data-role="unit-line">
+                <span class="unit-price" data-role="unit-price">${placeholders.unitPrice}</span>
+                <span class="unit-separator">per</span>
+                <span class="unit-text" data-role="unit">${placeholders.unit}</span>
               </div>
-              <div class="tag-title" data-role="heading">${globalSettings.heading || 'Members Price'}</div>
-              <div class="price-line is-placeholder" data-role="price-line" data-has-minor="false" data-has-suffix="false" data-placeholder="${(globalSettings.currencySymbol || '') + '0.00'}">
-                <span class="price-currency" data-role="currency">${globalSettings.currencySymbol || ''}</span>
-                <span class="price-major" data-role="major"></span>
-                <span class="price-minor" data-role="minor"></span>
-                <span class="price-suffix" data-role="suffix"></span>
+              <div class="expiry-pill" data-role="expiry">
+                <span class="expiry-label">Expires</span>
+                <span class="expiry-date" data-role="end-date">${placeholders.endDate}</span>
               </div>
-              <div class="product-name is-placeholder" data-role="product"></div>
-              <div class="note-text is-placeholder" data-role="note"></div>
             </div>
           `;
+          const priceEl = label.querySelector('[data-role="price"]');
+          const unitPriceEl = label.querySelector('[data-role="unit-price"]');
+          const unitEl = label.querySelector('[data-role="unit"]');
+          const unitLineEl = label.querySelector('[data-role="unit-line"]');
+          const expiryEl = label.querySelector('[data-role="end-date"]');
+          const expiryPill = label.querySelector('[data-role="expiry"]');
           labelGrid.appendChild(label);
-          labelElements.push(label);
+          labelRefs[index] = { priceEl, unitPriceEl, unitEl, unitLineEl, expiryEl, expiryPill };
         }
 
         for (let i = 0; i < TAG_COUNT; i += 1) {
-          createLabel();
+          createLabel(i);
         }
 
-        function setTextWithPlaceholder(element, value, placeholderKey) {
-          const text = (value || '').trim();
-          if (text) {
-            element.textContent = text;
-            element.classList.remove('is-placeholder');
-            element.removeAttribute('data-placeholder');
-          } else {
-            element.textContent = '';
-            element.classList.add('is-placeholder');
-            element.setAttribute('data-placeholder', placeholders[placeholderKey]);
-          }
-        }
-
-        function formatExpiry(value) {
+        function formatDate(value) {
           if (!value) return '';
           const trimmed = value.trim();
           if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
@@ -744,87 +473,28 @@
           return trimmed;
         }
 
-        function parsePrice(input) {
-          const raw = (input || '').trim();
-          if (!raw) {
-            return { major: '', minor: '', trailing: '' };
+        function setText(element, value, placeholder) {
+          const text = (value || '').trim();
+          if (text) {
+            element.textContent = text;
+            element.dataset.empty = 'false';
+          } else {
+            element.textContent = placeholder;
+            element.dataset.empty = 'true';
           }
-          const sanitized = raw.replace(/^[^0-9-]*/, '');
-          const match = sanitized.match(/^(-?\d+)(?:[.,](\d{1,2}))?(.*)$/);
-          if (!match) {
-            return { major: sanitized, minor: '', trailing: '' };
-          }
-          const [, whole, decimals = '', trailing = ''] = match;
-          return { major: whole, minor: decimals, trailing: trailing.trim() };
         }
 
         function updateLabel(index) {
           const data = tagData[index];
-          const label = labelElements[index];
-          const unitEl = label.querySelector('[data-role="unit"]');
-          const headingEl = label.querySelector('[data-role="heading"]');
-          const priceLineEl = label.querySelector('[data-role="price-line"]');
-          const currencyEl = label.querySelector('[data-role="currency"]');
-          const majorEl = label.querySelector('[data-role="major"]');
-          const minorEl = label.querySelector('[data-role="minor"]');
-          const suffixEl = label.querySelector('[data-role="suffix"]');
-          const productEl = label.querySelector('[data-role="product"]');
-          const noteEl = label.querySelector('[data-role="note"]');
-          const expiryWrapper = label.querySelector('[data-role="expiry"]');
-          const expiryLabelEl = expiryWrapper.querySelector('.expiry-label');
-          const expiryDateEl = expiryWrapper.querySelector('.expiry-date');
-
-          setTextWithPlaceholder(unitEl, data.unitPrice, 'unitPrice');
-          setTextWithPlaceholder(productEl, data.productName, 'productName');
-          setTextWithPlaceholder(noteEl, data.note, 'note');
-
-          headingEl.textContent = globalSettings.heading || 'Members Price';
-
-          const currency = globalSettings.currencySymbol || '';
-          currencyEl.textContent = currency;
-          currencyEl.style.display = currency ? 'inline' : 'none';
-
-          const parsed = parsePrice(data.price);
-          if (parsed.major) {
-            priceLineEl.classList.remove('is-placeholder');
-            priceLineEl.removeAttribute('data-placeholder');
-            majorEl.textContent = parsed.major;
-            if (parsed.minor) {
-              minorEl.textContent = '.' + parsed.minor.padEnd(2, '0');
-              priceLineEl.dataset.hasMinor = 'true';
-            } else {
-              minorEl.textContent = '';
-              priceLineEl.dataset.hasMinor = 'false';
-            }
-            const suffix = (data.priceSuffix || '').trim() || parsed.trailing;
-            if (suffix) {
-              suffixEl.textContent = suffix;
-              priceLineEl.dataset.hasSuffix = 'true';
-            } else {
-              suffixEl.textContent = '';
-              priceLineEl.dataset.hasSuffix = 'false';
-            }
-          } else {
-            priceLineEl.classList.add('is-placeholder');
-            priceLineEl.setAttribute('data-placeholder', (currency || '') + '0.00');
-            majorEl.textContent = '';
-            minorEl.textContent = '';
-            suffixEl.textContent = '';
-            priceLineEl.dataset.hasMinor = 'false';
-            priceLineEl.dataset.hasSuffix = 'false';
-          }
-
-          const formattedExpiry = formatExpiry(data.expiry);
-          expiryLabelEl.textContent = globalSettings.expiryLabel || 'Expires';
-          if (formattedExpiry) {
-            expiryWrapper.classList.remove('is-placeholder');
-            expiryDateEl.textContent = formattedExpiry;
-            expiryDateEl.removeAttribute('data-placeholder');
-          } else {
-            expiryWrapper.classList.add('is-placeholder');
-            expiryDateEl.textContent = '';
-            expiryDateEl.setAttribute('data-placeholder', placeholders.expiry);
-          }
+          const refs = labelRefs[index];
+          setText(refs.priceEl, data.price, placeholders.price);
+          setText(refs.unitPriceEl, data.unitPrice, placeholders.unitPrice);
+          setText(refs.unitEl, data.unit, placeholders.unit);
+          const formattedDate = formatDate(data.endDate);
+          setText(refs.expiryEl, formattedDate, placeholders.endDate);
+          const hasUnitDetails = Boolean((data.unitPrice || '').trim() || (data.unit || '').trim());
+          refs.unitLineEl.dataset.empty = hasUnitDetails ? 'false' : 'true';
+          refs.expiryPill.dataset.empty = refs.expiryEl.dataset.empty;
         }
 
         function updateAllLabels() {
@@ -833,22 +503,12 @@
           }
         }
 
-        function syncInputsFromData() {
-          document.querySelectorAll('.entry-input').forEach((input) => {
-            const index = Number(input.dataset.index);
-            const field = input.dataset.field;
-            input.value = tagData[index][field] || '';
-          });
-        }
-
         const entriesBody = document.getElementById('entriesBody');
         const fields = [
-          { key: 'productName', placeholder: 'Product name', multiline: false },
-          { key: 'price', placeholder: '4.75', multiline: false },
-          { key: 'priceSuffix', placeholder: 'EA', multiline: false },
-          { key: 'unitPrice', placeholder: '£2.38 per 100g', multiline: false },
-          { key: 'expiry', placeholder: '14/08/2025', multiline: false },
-          { key: 'note', placeholder: 'Optional note', multiline: true },
+          { key: 'price', placeholder: '£4.75' },
+          { key: 'unitPrice', placeholder: '£2.38' },
+          { key: 'unit', placeholder: '100g' },
+          { key: 'endDate', placeholder: '14/08/2025' },
         ];
 
         tagData.forEach((_, index) => {
@@ -859,12 +519,8 @@
 
           fields.forEach((field) => {
             const cell = document.createElement('td');
-            const input = document.createElement(field.multiline ? 'textarea' : 'input');
-            if (!field.multiline) {
-              input.type = 'text';
-            } else {
-              input.rows = 2;
-            }
+            const input = document.createElement('input');
+            input.type = 'text';
             input.className = 'entry-input';
             input.dataset.index = index;
             input.dataset.field = field.key;
@@ -878,7 +534,17 @@
           entriesBody.appendChild(row);
         });
 
-        document.querySelectorAll('.entry-input').forEach((input) => {
+        const entryInputs = Array.from(document.querySelectorAll('.entry-input'));
+
+        function syncInputsFromData() {
+          entryInputs.forEach((input) => {
+            const index = Number(input.dataset.index);
+            const field = input.dataset.field;
+            input.value = tagData[index][field] || '';
+          });
+        }
+
+        entryInputs.forEach((input) => {
           input.addEventListener('input', (event) => {
             const target = event.currentTarget;
             const index = Number(target.dataset.index);
@@ -891,41 +557,6 @@
         syncInputsFromData();
         updateAllLabels();
 
-        function updateSetting(key, value) {
-          globalSettings[key] = value;
-          updateAllLabels();
-        }
-
-        headingInput.addEventListener('input', (event) => {
-          updateSetting('heading', event.target.value.trim());
-        });
-
-        currencyInput.addEventListener('input', (event) => {
-          updateSetting('currencySymbol', event.target.value);
-        });
-
-        expiryLabelInput.addEventListener('input', (event) => {
-          updateSetting('expiryLabel', event.target.value.trim());
-        });
-
-        document.querySelectorAll('[data-css-var]').forEach((input) => {
-          const varName = input.dataset.cssVar;
-          const unit = input.dataset.unit || 'cm';
-          const apply = () => {
-            const numeric = parseFloat(input.value);
-            if (!Number.isFinite(numeric)) {
-              return;
-            }
-            document.documentElement.style.setProperty(varName, numeric + unit);
-          };
-          apply();
-          input.addEventListener('input', apply);
-        });
-
-        document.getElementById('showGuides').addEventListener('change', (event) => {
-          document.body.classList.toggle('show-guides', event.target.checked);
-        });
-
         document.getElementById('copyFirst').addEventListener('click', () => {
           const base = { ...tagData[0] };
           for (let i = 1; i < TAG_COUNT; i += 1) {
@@ -937,67 +568,13 @@
 
         document.getElementById('clearAll').addEventListener('click', () => {
           tagData.forEach((item) => {
-            Object.keys(item).forEach((key) => {
-              item[key] = '';
-            });
+            item.price = '';
+            item.unitPrice = '';
+            item.unit = '';
+            item.endDate = '';
           });
           syncInputsFromData();
           updateAllLabels();
-        });
-
-        function parseCsvLine(line) {
-          const result = [];
-          let current = '';
-          let inQuotes = false;
-          for (let i = 0; i < line.length; i += 1) {
-            const char = line[i];
-            if (char === '"') {
-              if (inQuotes && line[i + 1] === '"') {
-                current += '"';
-                i += 1;
-              } else {
-                inQuotes = !inQuotes;
-              }
-            } else if (char === ',' && !inQuotes) {
-              result.push(current.trim());
-              current = '';
-            } else {
-              current += char;
-            }
-          }
-          result.push(current.trim());
-          return result;
-        }
-
-        document.getElementById('csvInput').addEventListener('change', (event) => {
-          const file = event.target.files && event.target.files[0];
-          if (!file) {
-            return;
-          }
-          const reader = new FileReader();
-          reader.onload = (loadEvent) => {
-            const text = String(loadEvent.target?.result || '');
-            const lines = text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
-            if (!lines.length) {
-              return;
-            }
-            const hasHeader = document.getElementById('csvHasHeader').checked;
-            const rows = hasHeader ? lines.slice(1) : lines;
-            rows.slice(0, TAG_COUNT).forEach((line, idx) => {
-              const cols = parseCsvLine(line);
-              const entry = tagData[idx];
-              entry.productName = cols[0] || '';
-              entry.price = cols[1] || '';
-              entry.priceSuffix = cols[2] || '';
-              entry.unitPrice = cols[3] || '';
-              entry.expiry = cols[4] || '';
-              entry.note = cols[5] || '';
-            });
-            syncInputsFromData();
-            updateAllLabels();
-          };
-          reader.readAsText(file);
-          event.target.value = '';
         });
 
         const pdfOptions = {
