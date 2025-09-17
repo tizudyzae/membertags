@@ -275,10 +275,10 @@
       .label-card {
         background: var(--tag-bg);
         color: var(--tag-text);
-        padding: 0.24cm 0.44cm 0.24cm;
+        padding: 0.28cm 0.44cm 0.26cm;
         display: flex;
         flex-direction: column;
-        align-items: center;
+        align-items: stretch;
         text-align: center;
         gap: 0.09cm;
         width: 100%;
@@ -286,12 +286,18 @@
         border-radius: 0;
       }
 
+      .label-card .tag-heading,
+      .label-card .price,
+      .label-card .unit-line {
+        align-self: center;
+        text-align: center;
+      }
+
       .label-blank {
         background: #ffffff;
       }
 
       .tag-heading {
-        width: 100%;
         font-family: var(--heading-font);
         font-size: 0.48cm;
         letter-spacing: 0.05em;
@@ -331,14 +337,16 @@
         background: var(--pill-bg);
         color: var(--pill-text);
         border-radius: 999px;
-        padding: 0.1cm 0.36cm;
-        font-size: 0.28cm;
+        padding: 0.08cm 0.32cm;
+        font-size: 0.24cm;
         font-weight: 700;
-        letter-spacing: 0.08em;
+        letter-spacing: 0.06em;
         text-transform: uppercase;
         display: inline-flex;
         align-items: center;
-        gap: 0.09cm;
+        gap: 0.06cm;
+        max-width: 100%;
+        white-space: nowrap;
       }
 
       .price[data-empty='true'],
