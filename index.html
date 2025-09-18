@@ -31,7 +31,7 @@
         --row-gap: 0cm;
         --tag-width: 10.5cm;
         --tag-height: 3.7cm;
-        --tag-bg: #050505;
+        --tag-bg: #00A1CC;
         --tag-text: #ffffff;
         --pill-bg: #ffffff;
         --pill-text: #111827;
@@ -212,7 +212,8 @@
         font-weight: 700;
       }
 
-      .entries-table input[type='text'] {
+      .entries-table input[type='text'],
+      .entries-table select {
         width: 100%;
         border-radius: 10px;
         border: 1px solid #d1d5db;
@@ -223,7 +224,8 @@
         transition: border-color 0.2s ease, box-shadow 0.2s ease;
       }
 
-      .entries-table input[type='text']:focus {
+      .entries-table input[type='text']:focus,
+      .entries-table select:focus {
         outline: none;
         border-color: #2563eb;
         box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
@@ -344,6 +346,25 @@
 
       .label-blank {
         background: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.4cm;
+      }
+
+      .product-name {
+        font-family: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
+        font-weight: 600;
+        font-size: 0.6cm;
+        color: #000000;
+        text-align: center;
+        line-height: 1.1;
+        word-break: break-word;
+        width: 100%;
+      }
+
+      .product-name[data-empty='true'] {
+        opacity: 0.45;
       }
 
       .tag-heading {
@@ -492,10 +513,12 @@
             <thead>
               <tr>
                 <th>#</th>
+                <th>Product name</th>
                 <th>Price</th>
                 <th>Unit price</th>
                 <th>Unit</th>
                 <th>End date</th>
+                <th>Card colour</th>
               </tr>
             </thead>
             <tbody id="entriesBody"></tbody>
@@ -537,7 +560,14 @@
         const ROW_COUNT = 7;
         const MAX_TAGS = COLUMN_COUNT * ROW_COUNT;
 
+        const TAG_COLOR_OPTIONS = [
+          { value: '#00A1CC', label: 'Teal (#00A1CC)' },
+          { value: '#000000', label: 'Black (#000000)' },
+        ];
+        const DEFAULT_TAG_COLOR = TAG_COLOR_OPTIONS[0].value;
+
         const placeholders = {
+          productName: 'Product name',
           price: '£0.00',
           unitPrice: '£0.00',
           unit: '100g',
@@ -545,10 +575,12 @@
         };
 
         const tagData = Array.from({ length: MAX_TAGS }, () => ({
+          productName: '',
           price: '',
           unitPrice: '',
           unit: '',
           endDate: '',
+          tagColor: DEFAULT_TAG_COLOR,
         }));
 
         let activeRowCount = 0;
@@ -575,8 +607,11 @@
                 <span class="expiry-date" data-role="end-date">${placeholders.endDate}</span>
               </div>
             </div>
-            <div class="label-blank" aria-hidden="true"></div>
+            <div class="label-blank">
+              <div class="product-name" data-role="product-name">${placeholders.productName}</div>
+            </div>
           `;
+          const productNameEl = label.querySelector('[data-role="product-name"]');
           const priceEl = label.querySelector('[data-role="price"]');
           const unitPriceEl = label.querySelector('[data-role="unit-price"]');
           const unitEl = label.querySelector('[data-role="unit"]');
@@ -584,7 +619,16 @@
           const expiryEl = label.querySelector('[data-role="end-date"]');
           const expiryPill = label.querySelector('[data-role="expiry"]');
           labelGrid.appendChild(label);
-          labelRefs[index] = { label, priceEl, unitPriceEl, unitEl, unitLineEl, expiryEl, expiryPill };
+          labelRefs[index] = {
+            label,
+            productNameEl,
+            priceEl,
+            unitPriceEl,
+            unitEl,
+            unitLineEl,
+            expiryEl,
+            expiryPill,
+          };
         }
 
         for (let i = 0; i < MAX_TAGS; i += 1) {
@@ -649,6 +693,7 @@
           }
 
           const data = tagData[index];
+          setText(refs.productNameEl, data.productName, placeholders.productName);
           setText(refs.priceEl, data.price, placeholders.price);
           setText(refs.unitPriceEl, data.unitPrice, placeholders.unitPrice);
           setText(refs.unitEl, data.unit, placeholders.unit);
@@ -657,6 +702,12 @@
           const hasUnitDetails = Boolean((data.unitPrice || '').trim() || (data.unit || '').trim());
           refs.unitLineEl.dataset.empty = hasUnitDetails ? 'false' : 'true';
           refs.expiryPill.dataset.empty = refs.expiryEl.dataset.empty;
+
+          const selectedColor = (data.tagColor || '').trim().toLowerCase();
+          const matchingColor =
+            TAG_COLOR_OPTIONS.find((option) => option.value.toLowerCase() === selectedColor)?.value ||
+            DEFAULT_TAG_COLOR;
+          refs.label.style.setProperty('--tag-bg', matchingColor);
 
           applyPriceScaling(refs.priceEl);
         }
@@ -669,6 +720,7 @@
 
         const entriesBody = document.getElementById('entriesBody');
         const fields = [
+          { key: 'productName', placeholder: 'Product name' },
           { key: 'price', placeholder: '£4.75' },
           { key: 'unitPrice', placeholder: '£2.38' },
           { key: 'unit', placeholder: '100g' },
@@ -699,6 +751,22 @@
             row.appendChild(cell);
           });
 
+          const colourCell = document.createElement('td');
+          const colourSelect = document.createElement('select');
+          colourSelect.className = 'entry-input';
+          colourSelect.dataset.index = index;
+          colourSelect.dataset.field = 'tagColor';
+
+          TAG_COLOR_OPTIONS.forEach((option) => {
+            const optionEl = document.createElement('option');
+            optionEl.value = option.value;
+            optionEl.textContent = option.label;
+            colourSelect.appendChild(optionEl);
+          });
+
+          colourCell.appendChild(colourSelect);
+          row.appendChild(colourCell);
+
           row.hidden = true;
           entriesBody.appendChild(row);
           entryRows.push(row);
@@ -710,18 +778,28 @@
           entryInputs.forEach((input) => {
             const index = Number(input.dataset.index);
             const field = input.dataset.field;
-            input.value = tagData[index][field] || '';
+            if (field === 'tagColor') {
+              const storedValue = tagData[index][field] || DEFAULT_TAG_COLOR;
+              input.value = storedValue;
+              if (!tagData[index][field]) {
+                tagData[index][field] = storedValue;
+              }
+            } else {
+              input.value = tagData[index][field] || '';
+            }
           });
         }
 
         entryInputs.forEach((input) => {
-          input.addEventListener('input', (event) => {
+          const handleInput = (event) => {
             const target = event.currentTarget;
             const index = Number(target.dataset.index);
             const field = target.dataset.field;
             tagData[index][field] = target.value;
             updateLabel(index);
-          });
+          };
+          input.addEventListener('input', handleInput);
+          input.addEventListener('change', handleInput);
         });
 
         const addRowButton = document.getElementById('addRow');
@@ -761,10 +839,12 @@
 
         document.getElementById('clearAll').addEventListener('click', () => {
           tagData.forEach((item) => {
+            item.productName = '';
             item.price = '';
             item.unitPrice = '';
             item.unit = '';
             item.endDate = '';
+            item.tagColor = DEFAULT_TAG_COLOR;
           });
           syncInputsFromData();
           setActiveRowCount(1);
