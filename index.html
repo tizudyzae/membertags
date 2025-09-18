@@ -758,6 +758,10 @@
         let previewVisible = false;
 
         const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+        const PRICE_DOUBLE_DIGIT_THRESHOLD = 9.99;
+        const PRICE_TRIPLE_DIGIT_THRESHOLD = 99.99;
+        const PRICE_DOUBLE_DIGIT_SCALE = 0.86;
+        const PRICE_TRIPLE_DIGIT_SCALE = 0.72;
 
         function createLabel(index) {
           const label = document.createElement('div');
@@ -825,29 +829,53 @@
           }
         }
 
+        function parsePriceValue(text) {
+          if (!text) return null;
+          const normalized = text.replace(/[^0-9.,-]/g, '').replace(/,/g, '');
+          if (!normalized) return null;
+          const value = parseFloat(normalized);
+          if (!Number.isFinite(value)) {
+            return null;
+          }
+          return Math.abs(value);
+        }
+
+        function getBasePriceScale(value) {
+          if (!Number.isFinite(value)) {
+            return 1;
+          }
+          if (value > PRICE_TRIPLE_DIGIT_THRESHOLD) {
+            return PRICE_TRIPLE_DIGIT_SCALE;
+          }
+          if (value > PRICE_DOUBLE_DIGIT_THRESHOLD) {
+            return PRICE_DOUBLE_DIGIT_SCALE;
+          }
+          return 1;
+        }
+
         function applyPriceScaling(priceEl) {
           if (!priceEl) return;
 
           priceEl.style.setProperty('--price-scale', '1');
 
-          if (priceEl.offsetParent === null) {
-            return;
+          const priceValue = parsePriceValue(priceEl.textContent || '');
+          let finalScale = getBasePriceScale(priceValue);
+
+          if (priceEl.offsetParent !== null) {
+            const availableWidth = priceEl.clientWidth;
+            const availableHeight = priceEl.clientHeight;
+            const requiredWidth = priceEl.scrollWidth;
+            const requiredHeight = priceEl.scrollHeight;
+
+            if (availableWidth && availableHeight && requiredWidth && requiredHeight) {
+              const widthRatio = availableWidth / requiredWidth;
+              const heightRatio = availableHeight / requiredHeight;
+              const autoScale = Math.min(1, widthRatio, heightRatio);
+              finalScale = Math.min(finalScale, autoScale);
+            }
           }
 
-          const availableWidth = priceEl.clientWidth;
-          const availableHeight = priceEl.clientHeight;
-          const requiredWidth = priceEl.scrollWidth;
-          const requiredHeight = priceEl.scrollHeight;
-
-          if (!availableWidth || !availableHeight || !requiredWidth || !requiredHeight) {
-            return;
-          }
-
-          const widthRatio = availableWidth / requiredWidth;
-          const heightRatio = availableHeight / requiredHeight;
-          const scale = Math.min(1, widthRatio, heightRatio);
-
-          priceEl.style.setProperty('--price-scale', scale < 1 ? scale.toFixed(3) : '1');
+          priceEl.style.setProperty('--price-scale', finalScale < 1 ? finalScale.toFixed(3) : '1');
         }
 
         function updateLabel(index) {
