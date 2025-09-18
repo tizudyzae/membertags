@@ -38,6 +38,10 @@
         --body-font: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
         --display-font: 'FontNumbers', 'Barlow Condensed', 'Impact', sans-serif;
         --heading-font: 'Impact', 'Impact Regular', 'Arial Black', sans-serif;
+        --heading-height-scale: 1;
+        --price-height-scale: 1;
+        --unit-height-scale: 1;
+        --expiry-height-scale: 1;
       }
 
       *,
@@ -122,6 +126,61 @@
         font-size: 0.85rem;
         line-height: 1.5;
         color: #4b5563;
+      }
+
+      .controls h3 {
+        margin: 0;
+        font-size: 0.9rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .control-section {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .control-description {
+        margin: 0;
+        font-size: 0.8rem;
+        line-height: 1.4;
+        color: #6b7280;
+      }
+
+      .scale-controls {
+        display: grid;
+        gap: 0.85rem;
+      }
+
+      .scale-row {
+        display: grid;
+        gap: 0.4rem;
+      }
+
+      .scale-row label {
+        font-size: 0.78rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #4b5563;
+      }
+
+      .scale-input {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .scale-input input[type='range'] {
+        flex: 1;
+      }
+
+      .scale-output {
+        font-size: 0.78rem;
+        font-variant-numeric: tabular-nums;
+        min-width: 3.5ch;
+        text-align: right;
+        color: #111827;
       }
 
       .entries-table-wrapper {
@@ -315,6 +374,8 @@
         line-height: 1.5;
         white-space: nowrap;
         margin: 0;
+        transform: scaleY(var(--heading-height-scale));
+        transform-origin: center;
       }
 
       .price {
@@ -323,32 +384,42 @@
         line-height: 0.7;
         font-weight: 400;
         letter-spacing: 0.01em;
+        transform: scaleY(var(--price-height-scale));
+        transform-origin: center;
       }
 
       .unit-line {
         font-size: 0.33cm;
         letter-spacing: 0.06em;
-        font-weight: 600;
-        color: rgb(255, 255, 255);
+        font-weight: 400;
+        color: #ffffff;
         display: flex;
         gap: 0.1cm;
         align-items: baseline;
         justify-content: center;
+        font-family: 'Avenir Next', 'Avenir Next LT Pro', 'Avenir', 'Montserrat', sans-serif;
+        font-style: italic;
+        transform: scaleY(var(--unit-height-scale));
+        transform-origin: center;
       }
 
       .unit-separator {
         text-transform: lowercase;
       }
 
+      .unit-price {
+        color: #ffffff;
+      }
+
       .expiry-pill {
         margin-top: auto;
         align-self: center;
-        background: var(--pill-bg);
-        color: var(--pill-text);
+        background: #ffffff;
+        color: #000000;
         border-radius: 999px;
         padding: 0.12cm 0.36cm;
         font-size: 0.24cm;
-        font-weight: 700;
+        font-weight: 400;
         letter-spacing: 0.06em;
         text-transform: uppercase;
         display: inline-flex;
@@ -358,6 +429,10 @@
         max-width: 100%;
         white-space: nowrap;
         line-height: 1;
+        font-family: 'Avenir Next', 'Avenir Next LT Pro', 'Avenir', 'Montserrat', sans-serif;
+        font-style: italic;
+        transform: scaleY(var(--expiry-height-scale));
+        transform-origin: center;
       }
 
       .expiry-pill span {
@@ -367,6 +442,7 @@
       .expiry-date {
         font-size: 0.2cm;
         letter-spacing: 0.03em;
+        color: #000000;
       }
 
       .price[data-empty='true'],
@@ -429,6 +505,42 @@
             Enter the price, unit price, unit, and end date for each tag. The layout of every tag matches the provided mock-up.
           </p>
         </div>
+        <div class="control-section" aria-label="Font height adjustments">
+          <h3>Font height adjustments</h3>
+          <p class="control-description">
+            Change the vertical stretch of each typographic element without altering its width to fine-tune printed tags.
+          </p>
+          <div class="scale-controls">
+            <div class="scale-row">
+              <label for="headingHeight">Heading height</label>
+              <div class="scale-input">
+                <input type="range" id="headingHeight" min="0.6" max="1.4" step="0.01" value="1" />
+                <output id="headingHeightValue" class="scale-output" for="headingHeight">1.00×</output>
+              </div>
+            </div>
+            <div class="scale-row">
+              <label for="priceHeight">Price height</label>
+              <div class="scale-input">
+                <input type="range" id="priceHeight" min="0.6" max="1.5" step="0.01" value="1" />
+                <output id="priceHeightValue" class="scale-output" for="priceHeight">1.00×</output>
+              </div>
+            </div>
+            <div class="scale-row">
+              <label for="unitHeight">Unit line height</label>
+              <div class="scale-input">
+                <input type="range" id="unitHeight" min="0.6" max="1.4" step="0.01" value="1" />
+                <output id="unitHeightValue" class="scale-output" for="unitHeight">1.00×</output>
+              </div>
+            </div>
+            <div class="scale-row">
+              <label for="expiryHeight">Expiry height</label>
+              <div class="scale-input">
+                <input type="range" id="expiryHeight" min="0.6" max="1.4" step="0.01" value="1" />
+                <output id="expiryHeightValue" class="scale-output" for="expiryHeight">1.00×</output>
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="entries-table-wrapper">
           <table class="entries-table">
             <thead>
@@ -483,6 +595,38 @@
 
         const labelGrid = document.getElementById('labelGrid');
         const labelRefs = [];
+
+        const rootElement = document.documentElement;
+        const heightControls = [
+          { id: 'headingHeight', variable: '--heading-height-scale', output: 'headingHeightValue' },
+          { id: 'priceHeight', variable: '--price-height-scale', output: 'priceHeightValue' },
+          { id: 'unitHeight', variable: '--unit-height-scale', output: 'unitHeightValue' },
+          { id: 'expiryHeight', variable: '--expiry-height-scale', output: 'expiryHeightValue' },
+        ];
+
+        const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+
+        heightControls.forEach(({ id, variable, output }) => {
+          const input = document.getElementById(id);
+          const outputEl = document.getElementById(output);
+          if (!input || !outputEl) return;
+
+          const min = Number.parseFloat(input.min) || 0.5;
+          const max = Number.parseFloat(input.max) || 1.5;
+
+          const applyValue = (raw) => {
+            const numeric = clamp(Number.parseFloat(raw) || 1, min, max);
+            const formatted = numeric.toFixed(2);
+            rootElement.style.setProperty(variable, formatted);
+            outputEl.textContent = `${formatted}×`;
+          };
+
+          applyValue(input.value);
+
+          input.addEventListener('input', (event) => {
+            applyValue(event.currentTarget.value);
+          });
+        });
 
         function createLabel(index) {
           const label = document.createElement('div');
