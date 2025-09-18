@@ -1259,16 +1259,31 @@
           printButton.addEventListener('click', () => {
             const shouldHideAfter = !previewVisible;
 
+            const performPrint = () => {
+              updateAllLabels();
+
+              try {
+                window.print();
+              } finally {
+                if (shouldHideAfter) {
+                  setPreviewVisibility(false);
+                }
+              }
+            };
+
             if (shouldHideAfter) {
               setPreviewVisibility(true);
+
+              const schedule =
+                typeof window.requestAnimationFrame === 'function'
+                  ? window.requestAnimationFrame.bind(window)
+                  : (callback) => setTimeout(callback, 0);
+
+              schedule(() => {
+                schedule(performPrint);
+              });
             } else {
-              updateAllLabels();
-            }
-
-            window.print();
-
-            if (shouldHideAfter) {
-              setPreviewVisibility(false);
+              performPrint();
             }
           });
         }
