@@ -98,20 +98,86 @@
         .add-row-wrapper {
           justify-content: center;
           padding-top: 0;
+          width: 100%;
         }
 
         .actions {
           margin-left: 0;
           width: 100%;
           justify-content: center;
+          flex-direction: column;
+          align-items: stretch;
         }
 
         .actions button {
-          flex: 1 1 auto;
+          flex: none;
+          width: 100%;
         }
 
         .controls {
           padding: 1.5rem;
+        }
+
+        .entries-table-wrapper {
+          border: none;
+          border-radius: 0;
+          overflow: visible;
+        }
+
+        .entries-table {
+          display: block;
+          width: 100%;
+        }
+
+        .entries-table thead {
+          display: none;
+        }
+
+        .entries-table tbody {
+          display: grid;
+          gap: 1.25rem;
+        }
+
+        .entries-table tr {
+          display: flex;
+          flex-direction: column;
+          gap: 0.9rem;
+          border: 1px solid #e5e7eb;
+          border-radius: 16px;
+          padding: 1rem 1.1rem;
+          box-shadow: 0 20px 40px -18px rgba(15, 23, 42, 0.35);
+          background: #ffffff;
+        }
+
+        .entries-table td {
+          border: none;
+          padding: 0;
+          background: transparent;
+        }
+
+        .entries-table td:first-child,
+        .entries-table th:first-child {
+          width: auto;
+          text-align: left;
+          margin-bottom: 0.25rem;
+        }
+
+        .entry-index {
+          width: 2.5rem;
+          height: 2.5rem;
+          font-size: 1rem;
+          background: #1f2937;
+          color: #ffffff;
+        }
+
+        .entry-field-label {
+          display: block;
+        }
+
+        .entries-table input[type='text'],
+        .entries-table select {
+          padding: 0.65rem 0.75rem;
+          font-size: 1rem;
         }
       }
 
@@ -248,6 +314,40 @@
         text-align: center;
         width: 2.2rem;
         font-weight: 700;
+      }
+
+      .entries-table tr[hidden] {
+        display: none !important;
+      }
+
+      .entry-index {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.9rem;
+        height: 1.9rem;
+        border-radius: 999px;
+        background: #f3f4f6;
+        color: #111827;
+        font-weight: 700;
+        font-size: 0.85rem;
+        line-height: 1;
+      }
+
+      .entry-field {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.45rem;
+      }
+
+      .entry-field-label {
+        display: none;
+        font-size: 0.7rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #6b7280;
+        font-weight: 600;
       }
 
       .entries-table input[type='text'],
@@ -813,11 +913,46 @@
 
         const entriesBody = document.getElementById('entriesBody');
         const fields = [
-          { key: 'productName', placeholder: 'Product name' },
-          { key: 'price', placeholder: '£4.75' },
-          { key: 'unitPrice', placeholder: '£2.38' },
-          { key: 'unit', placeholder: '100g' },
-          { key: 'endDate', placeholder: '14/08/2025' },
+          {
+            key: 'productName',
+            label: 'Product name',
+            placeholder: 'Product name',
+            inputMode: 'text',
+            autoCapitalize: 'words',
+            enterKeyHint: 'next',
+          },
+          {
+            key: 'price',
+            label: 'Price',
+            placeholder: '£4.75',
+            inputMode: 'decimal',
+            autoCapitalize: 'none',
+            enterKeyHint: 'next',
+          },
+          {
+            key: 'unitPrice',
+            label: 'Unit price',
+            placeholder: '£2.38',
+            inputMode: 'decimal',
+            autoCapitalize: 'none',
+            enterKeyHint: 'next',
+          },
+          {
+            key: 'unit',
+            label: 'Unit',
+            placeholder: '100g',
+            inputMode: 'text',
+            autoCapitalize: 'none',
+            enterKeyHint: 'next',
+          },
+          {
+            key: 'endDate',
+            label: 'End date',
+            placeholder: '14/08/2025',
+            inputMode: 'text',
+            autoCapitalize: 'none',
+            enterKeyHint: 'done',
+          },
         ];
 
         const entryRows = [];
@@ -827,11 +962,24 @@
           row.dataset.index = index;
 
           const indexCell = document.createElement('td');
-          indexCell.textContent = index + 1;
+          indexCell.setAttribute('aria-label', `Tag ${index + 1}`);
+          const indexBadge = document.createElement('span');
+          indexBadge.className = 'entry-index';
+          indexBadge.textContent = index + 1;
+          indexCell.appendChild(indexBadge);
           row.appendChild(indexCell);
 
           fields.forEach((field) => {
             const cell = document.createElement('td');
+            const fieldWrapper = document.createElement('label');
+            fieldWrapper.className = 'entry-field';
+            fieldWrapper.dataset.field = field.key;
+
+            const fieldLabel = document.createElement('span');
+            fieldLabel.className = 'entry-field-label';
+            fieldLabel.textContent = field.label;
+            fieldWrapper.appendChild(fieldLabel);
+
             const input = document.createElement('input');
             input.type = 'text';
             input.className = 'entry-input';
@@ -840,15 +988,43 @@
             input.placeholder = field.placeholder;
             input.autocomplete = 'off';
             input.spellcheck = false;
-            cell.appendChild(input);
+            input.id = `entry-${field.key}-${index}`;
+            input.name = `entry-${field.key}-${index}`;
+
+            if (field.inputMode) {
+              input.inputMode = field.inputMode;
+            }
+
+            if (field.autoCapitalize) {
+              input.autocapitalize = field.autoCapitalize;
+            }
+
+            if (field.enterKeyHint) {
+              input.enterKeyHint = field.enterKeyHint;
+            }
+
+            fieldWrapper.htmlFor = input.id;
+            fieldWrapper.appendChild(input);
+            cell.appendChild(fieldWrapper);
             row.appendChild(cell);
           });
 
           const colourCell = document.createElement('td');
+          const colourWrapper = document.createElement('label');
+          colourWrapper.className = 'entry-field';
+          colourWrapper.dataset.field = 'tagColor';
+
+          const colourLabel = document.createElement('span');
+          colourLabel.className = 'entry-field-label';
+          colourLabel.textContent = 'Card colour';
+          colourWrapper.appendChild(colourLabel);
+
           const colourSelect = document.createElement('select');
           colourSelect.className = 'entry-input';
           colourSelect.dataset.index = index;
           colourSelect.dataset.field = 'tagColor';
+          colourSelect.id = `entry-tagColor-${index}`;
+          colourSelect.name = `entry-tagColor-${index}`;
 
           TAG_COLOR_OPTIONS.forEach((option) => {
             const optionEl = document.createElement('option');
@@ -857,7 +1033,9 @@
             colourSelect.appendChild(optionEl);
           });
 
-          colourCell.appendChild(colourSelect);
+          colourWrapper.htmlFor = colourSelect.id;
+          colourWrapper.appendChild(colourSelect);
+          colourCell.appendChild(colourWrapper);
           row.appendChild(colourCell);
 
           row.hidden = true;
@@ -973,7 +1151,7 @@
           margin: 0,
           filename: 'members-price-tags.pdf',
           image: { type: 'jpeg', quality: 0.98 },
-          html2canvas: { scale: 2, useCORS: true },
+          html2canvas: { scale: 2, useCORS: true, scrollX: 0, scrollY: 0 },
           jsPDF: { unit: 'cm', format: 'a4', orientation: 'portrait' },
         };
 
@@ -1020,6 +1198,17 @@
               };
             }
 
+            const htmlRoot = document.documentElement;
+            const previousScrollX = window.scrollX || window.pageXOffset || 0;
+            const previousScrollY = window.scrollY || window.pageYOffset || 0;
+            const previousScrollBehavior = htmlRoot ? htmlRoot.style.scrollBehavior : '';
+
+            if (htmlRoot) {
+              htmlRoot.style.scrollBehavior = 'auto';
+            }
+
+            window.scrollTo(0, 0);
+
             try {
               await pdfGenerator().set(pdfOptions).from(target).save();
             } catch (error) {
@@ -1027,6 +1216,11 @@
               alert('Sorry, there was a problem generating the PDF. Please try again.');
             } finally {
               cleanup();
+              window.scrollTo(previousScrollX, previousScrollY);
+
+              if (htmlRoot) {
+                htmlRoot.style.scrollBehavior = previousScrollBehavior;
+              }
             }
           });
         }
