@@ -725,7 +725,7 @@
       </section>
     </main>
     <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"
+      src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     ></script>
@@ -1184,80 +1184,522 @@
           updateAllLabels();
         });
 
-        const pdfOptions = {
-          margin: 0,
-          filename: 'members-price-tags.pdf',
-          image: { type: 'jpeg', quality: 0.98 },
-          html2canvas: { scale: 2, useCORS: true, scrollX: 0, scrollY: 0 },
-          jsPDF: { unit: 'cm', format: 'a4', orientation: 'portrait' },
+        const CM_TO_PT = 72 / 2.54;
+        const PDF_LAYOUT = {
+          pageWidth: 21 * CM_TO_PT,
+          pageHeight: 29.7 * CM_TO_PT,
+          paddingTop: 1.9 * CM_TO_PT,
+          paddingRight: 0 * CM_TO_PT,
+          paddingBottom: 1.9 * CM_TO_PT,
+          paddingLeft: 0 * CM_TO_PT,
+          tagWidth: 10.5 * CM_TO_PT,
+          tagHeight: 3.7 * CM_TO_PT,
+          cardWidth: 3.7 * CM_TO_PT,
+          cardPaddingX: 0.44 * CM_TO_PT,
+          cardPaddingTop: 0.28 * CM_TO_PT,
+          cardPaddingBottom: 0.26 * CM_TO_PT,
+          cardGap: 0.09 * CM_TO_PT,
+          blankPadding: 0.4 * CM_TO_PT,
+          headingFontSize: 0.49 * CM_TO_PT,
+          priceFontSize: 1.82 * CM_TO_PT,
+          unitLineFontSize: 0.33 * CM_TO_PT,
+          pillPaddingX: 0.36 * CM_TO_PT,
+          pillPaddingY: 0.12 * CM_TO_PT,
+          pillGap: 0.06 * CM_TO_PT,
+          pillLabelFontSize: 0.24 * CM_TO_PT,
+          pillDateFontSize: 0.2 * CM_TO_PT,
+          productFontSize: 0.6 * CM_TO_PT,
+          productLineHeightMultiplier: 1.1,
+          placeholderOpacity: 0.45,
         };
+        const fontByteCache = new Map();
+
+        function extractEmbeddedFontBase64(familyName) {
+          const target = (familyName || '').replace(/['"]/g, '').trim().toLowerCase();
+          if (!target) {
+            return null;
+          }
+          const styleSheets = Array.from(document.styleSheets || []);
+          for (const sheet of styleSheets) {
+            let rules;
+            try {
+              rules = sheet.cssRules || sheet.rules;
+            } catch (error) {
+              continue;
+            }
+            if (!rules) {
+              continue;
+            }
+            for (const rule of Array.from(rules)) {
+              if (typeof CSSRule !== 'undefined' && rule.type !== CSSRule.FONT_FACE_RULE) {
+                continue;
+              }
+              const fontFamily = (rule.style?.getPropertyValue('font-family') || '')
+                .replace(/['"]/g, '')
+                .trim()
+                .toLowerCase();
+              if (fontFamily !== target) {
+                continue;
+              }
+              const src = rule.style?.getPropertyValue('src') || '';
+              const match = src.match(/data:font\/[\w.+-]+;base64,([^"')]+)/i);
+              if (match) {
+                return match[1];
+              }
+            }
+          }
+          return null;
+        }
+
+        function base64ToUint8Array(base64) {
+          const binary = window.atob(base64);
+          const length = binary.length;
+          const bytes = new Uint8Array(length);
+          for (let i = 0; i < length; i += 1) {
+            bytes[i] = binary.charCodeAt(i);
+          }
+          return bytes;
+        }
+
+        function getEmbeddedFontBytes(familyName) {
+          if (fontByteCache.has(familyName)) {
+            return fontByteCache.get(familyName);
+          }
+          const base64 = extractEmbeddedFontBase64(familyName);
+          if (!base64) {
+            fontByteCache.set(familyName, null);
+            return null;
+          }
+          try {
+            const bytes = base64ToUint8Array(base64);
+            fontByteCache.set(familyName, bytes);
+            return bytes;
+          } catch (error) {
+            console.warn('Unable to decode embedded font', familyName, error);
+            fontByteCache.set(familyName, null);
+          }
+          return null;
+        }
+
+        function hexToRgbComponents(hexColor) {
+          if (!hexColor) {
+            return { r: 0, g: 0, b: 0 };
+          }
+          const normalized = hexColor.replace(/[^0-9a-f]/gi, '');
+          if (normalized.length === 3) {
+            const r = parseInt(normalized[0] + normalized[0], 16);
+            const g = parseInt(normalized[1] + normalized[1], 16);
+            const b = parseInt(normalized[2] + normalized[2], 16);
+            return { r: r / 255, g: g / 255, b: b / 255 };
+          }
+          if (normalized.length === 6) {
+            const r = parseInt(normalized.slice(0, 2), 16);
+            const g = parseInt(normalized.slice(2, 4), 16);
+            const b = parseInt(normalized.slice(4, 6), 16);
+            return { r: r / 255, g: g / 255, b: b / 255 };
+          }
+          return { r: 0, g: 0.63, b: 0.8 };
+        }
+
+        function getDisplayValue(value, placeholderValue) {
+          const trimmed = (value || '').trim();
+          if (trimmed) {
+            return { text: trimmed, isPlaceholder: false };
+          }
+          return { text: placeholderValue, isPlaceholder: true };
+        }
+
+        function splitLongWord(word, font, fontSize, maxWidth) {
+          if (!word) {
+            return [''];
+          }
+          const letters = Array.from(word);
+          const segments = [];
+          let current = '';
+          for (const letter of letters) {
+            const test = current + letter;
+            const testWidth = font.widthOfTextAtSize(test, fontSize);
+            if (testWidth <= maxWidth || !current) {
+              current = test;
+            } else {
+              segments.push(current);
+              current = letter;
+            }
+          }
+          if (current) {
+            segments.push(current);
+          }
+          return segments;
+        }
+
+        function wrapTextToWidth(text, font, fontSize, maxWidth) {
+          if (maxWidth <= 0) {
+            return [text];
+          }
+          const words = text.trim().split(/\s+/).filter(Boolean);
+          if (words.length === 0) {
+            return [''];
+          }
+          const lines = [];
+          let currentLine = '';
+          for (const word of words) {
+            const testLine = currentLine ? `${currentLine} ${word}` : word;
+            const testWidth = font.widthOfTextAtSize(testLine, fontSize);
+            if (testWidth <= maxWidth) {
+              currentLine = testLine;
+            } else if (!currentLine) {
+              const segments = splitLongWord(word, font, fontSize, maxWidth);
+              lines.push(...segments.slice(0, -1));
+              currentLine = segments[segments.length - 1];
+            } else {
+              lines.push(currentLine);
+              if (font.widthOfTextAtSize(word, fontSize) <= maxWidth) {
+                currentLine = word;
+              } else {
+                const segments = splitLongWord(word, font, fontSize, maxWidth);
+                lines.push(...segments.slice(0, -1));
+                currentLine = segments[segments.length - 1];
+              }
+            }
+          }
+          if (currentLine) {
+            lines.push(currentLine);
+          }
+          return lines.length > 0 ? lines : [''];
+        }
+
+        function computePriceFontSize(priceText, baseSize, font, maxWidth, maxHeight) {
+          if (!font) {
+            return baseSize;
+          }
+          let size = baseSize;
+          const priceValue = parsePriceValue(priceText);
+          size *= getBasePriceScale(priceValue);
+          if (Number.isFinite(maxHeight) && maxHeight > 0 && size > maxHeight) {
+            size = maxHeight;
+          }
+          if (Number.isFinite(maxWidth) && maxWidth > 0) {
+            const width = font.widthOfTextAtSize(priceText, size);
+            if (width > maxWidth) {
+              const scale = maxWidth / width;
+              size *= scale;
+            }
+          }
+          if (Number.isFinite(maxHeight) && maxHeight > 0) {
+            const height = size;
+            if (height > maxHeight) {
+              size *= maxHeight / height;
+            }
+          }
+          return size;
+        }
+
+        function canEncodeWithFont(font, text) {
+          if (!font || !text) {
+            return false;
+          }
+          try {
+            font.encodeText(text);
+            return true;
+          } catch (error) {
+            return false;
+          }
+        }
+
+        async function generateVectorPdf(data, activeCount) {
+          if (!window.PDFLib) {
+            throw new Error('PDF generation library is unavailable');
+          }
+          const { PDFDocument, StandardFonts, rgb } = window.PDFLib;
+          const pdfDoc = await PDFDocument.create();
+          const page = pdfDoc.addPage([PDF_LAYOUT.pageWidth, PDF_LAYOUT.pageHeight]);
+
+          const impactBytes = getEmbeddedFontBytes('Impact');
+          const numbersBytes = getEmbeddedFontBytes('FontNumbers');
+
+          const headingFont = impactBytes
+            ? await pdfDoc.embedFont(impactBytes, { subset: true })
+            : await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+          const pricePrimaryFont = numbersBytes
+            ? await pdfDoc.embedFont(numbersBytes, { subset: true })
+            : headingFont;
+          const priceFallbackFont = headingFont;
+          const bodyBoldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+          const bodyItalicFont = await pdfDoc.embedFont(StandardFonts.HelveticaOblique);
+
+          const normalizedCount = Number.isFinite(activeCount) ? activeCount : 0;
+          const tagsToRender = Math.max(
+            0,
+            Math.min(MAX_TAGS, data.length, Math.round(normalizedCount)),
+          );
+
+          const cardInnerWidth = PDF_LAYOUT.cardWidth - PDF_LAYOUT.cardPaddingX * 2;
+          const cardInnerHeight =
+            PDF_LAYOUT.tagHeight - PDF_LAYOUT.cardPaddingTop - PDF_LAYOUT.cardPaddingBottom;
+          const pillHeight =
+            PDF_LAYOUT.pillPaddingY * 2 +
+            Math.max(PDF_LAYOUT.pillLabelFontSize, PDF_LAYOUT.pillDateFontSize);
+          const priceMaxHeight =
+            cardInnerHeight -
+            PDF_LAYOUT.headingFontSize -
+            PDF_LAYOUT.unitLineFontSize -
+            pillHeight -
+            PDF_LAYOUT.cardGap * 2;
+
+          const drawRoundedPill = (x, y, width, height, opacity) => {
+            const radius = Math.max(0, Math.min(height / 2, width / 2));
+            const fillColor = rgb(1, 1, 1);
+            if (radius === 0) {
+              page.drawRectangle({ x, y, width, height, color: fillColor, opacity });
+              return;
+            }
+            const rectWidth = Math.max(0, width - radius * 2);
+            if (rectWidth > 0) {
+              page.drawRectangle({
+                x: x + radius,
+                y,
+                width: rectWidth,
+                height,
+                color: fillColor,
+                opacity,
+              });
+            }
+            page.drawCircle({
+              x: x + radius,
+              y: y + radius,
+              size: radius,
+              color: fillColor,
+              opacity,
+            });
+            page.drawCircle({
+              x: x + width - radius,
+              y: y + radius,
+              size: radius,
+              color: fillColor,
+              opacity,
+            });
+          };
+
+          for (let index = 0; index < tagsToRender; index += 1) {
+            const column = index % COLUMN_COUNT;
+            const row = Math.floor(index / COLUMN_COUNT);
+
+            const tagX = PDF_LAYOUT.paddingLeft + column * PDF_LAYOUT.tagWidth;
+            const tagY =
+              PDF_LAYOUT.pageHeight -
+              PDF_LAYOUT.paddingTop -
+              (row + 1) * PDF_LAYOUT.tagHeight;
+
+            const cardX = tagX;
+            const cardY = tagY;
+            const blankX = tagX + PDF_LAYOUT.cardWidth;
+            const blankY = tagY;
+            const blankWidth = PDF_LAYOUT.tagWidth - PDF_LAYOUT.cardWidth;
+            const blankHeight = PDF_LAYOUT.tagHeight;
+
+            const tag = data[index] || {};
+            const selectedColor = (tag.tagColor || DEFAULT_TAG_COLOR || '#00A1CC').trim();
+            const cardColor = hexToRgbComponents(selectedColor);
+            page.drawRectangle({
+              x: cardX,
+              y: cardY,
+              width: PDF_LAYOUT.cardWidth,
+              height: PDF_LAYOUT.tagHeight,
+              color: rgb(cardColor.r, cardColor.g, cardColor.b),
+            });
+            page.drawRectangle({
+              x: blankX,
+              y: blankY,
+              width: blankWidth,
+              height: blankHeight,
+              color: rgb(1, 1, 1),
+            });
+
+            const cardContentX = cardX + PDF_LAYOUT.cardPaddingX;
+            let cursorY = cardY + PDF_LAYOUT.tagHeight - PDF_LAYOUT.cardPaddingTop;
+
+            const headingText = 'Members Price';
+            const headingBaseline = cursorY - PDF_LAYOUT.headingFontSize;
+            const headingWidth = headingFont.widthOfTextAtSize(
+              headingText,
+              PDF_LAYOUT.headingFontSize,
+            );
+            const headingX = cardContentX + (cardInnerWidth - headingWidth) / 2;
+            page.drawText(headingText, {
+              x: headingX,
+              y: headingBaseline,
+              font: headingFont,
+              size: PDF_LAYOUT.headingFontSize,
+              color: rgb(1, 1, 1),
+            });
+            cursorY = headingBaseline - PDF_LAYOUT.cardGap;
+
+            const priceDisplay = getDisplayValue(tag.price, placeholders.price);
+            const priceText = priceDisplay.text;
+            let priceFont = pricePrimaryFont;
+            if (!canEncodeWithFont(priceFont, priceText) && canEncodeWithFont(priceFallbackFont, priceText)) {
+              priceFont = priceFallbackFont;
+            }
+            const priceSize = computePriceFontSize(
+              priceText,
+              PDF_LAYOUT.priceFontSize,
+              priceFont,
+              cardInnerWidth,
+              priceMaxHeight,
+            );
+            const priceBaseline = cursorY - priceSize;
+            const priceWidth = priceFont.widthOfTextAtSize(priceText, priceSize);
+            const priceX = cardContentX + (cardInnerWidth - priceWidth) / 2;
+            page.drawText(priceText, {
+              x: priceX,
+              y: priceBaseline,
+              font: priceFont,
+              size: priceSize,
+              color: rgb(1, 1, 1),
+              opacity: priceDisplay.isPlaceholder ? PDF_LAYOUT.placeholderOpacity : 1,
+            });
+            cursorY = priceBaseline - PDF_LAYOUT.cardGap;
+
+            const unitPriceDisplay = getDisplayValue(tag.unitPrice, placeholders.unitPrice);
+            const unitDisplay = getDisplayValue(tag.unit, placeholders.unit);
+            const hasUnitDetails =
+              Boolean((tag.unitPrice || '').trim()) || Boolean((tag.unit || '').trim());
+            const unitLineOpacity = hasUnitDetails ? 1 : PDF_LAYOUT.placeholderOpacity;
+            const unitBaseline = cursorY - PDF_LAYOUT.unitLineFontSize;
+            const unitSegments = [
+              {
+                text: unitPriceDisplay.text,
+                opacity:
+                  unitLineOpacity *
+                  (unitPriceDisplay.isPlaceholder ? PDF_LAYOUT.placeholderOpacity : 1),
+              },
+              { text: ' per ', opacity: unitLineOpacity },
+              {
+                text: unitDisplay.text,
+                opacity:
+                  unitLineOpacity *
+                  (unitDisplay.isPlaceholder ? PDF_LAYOUT.placeholderOpacity : 1),
+              },
+            ];
+            const unitWidths = unitSegments.map((segment) =>
+              bodyItalicFont.widthOfTextAtSize(segment.text, PDF_LAYOUT.unitLineFontSize),
+            );
+            const unitTotalWidth = unitWidths.reduce((sum, value) => sum + value, 0);
+            let unitX = cardContentX + (cardInnerWidth - unitTotalWidth) / 2;
+            unitSegments.forEach((segment, segmentIndex) => {
+              page.drawText(segment.text, {
+                x: unitX,
+                y: unitBaseline,
+                font: bodyItalicFont,
+                size: PDF_LAYOUT.unitLineFontSize,
+                color: rgb(1, 1, 1),
+                opacity: segment.opacity,
+              });
+              unitX += unitWidths[segmentIndex];
+            });
+
+            const formattedDate = formatDate(tag.endDate);
+            const expiryDisplay = getDisplayValue(formattedDate, placeholders.endDate);
+            const pillHeightValue = pillHeight;
+            const expiryLabelWidth = bodyItalicFont.widthOfTextAtSize(
+              'Expires',
+              PDF_LAYOUT.pillLabelFontSize,
+            );
+            const expiryDateWidth = bodyItalicFont.widthOfTextAtSize(
+              expiryDisplay.text,
+              PDF_LAYOUT.pillDateFontSize,
+            );
+            const pillWidth =
+              PDF_LAYOUT.pillPaddingX * 2 +
+              expiryLabelWidth +
+              PDF_LAYOUT.pillGap +
+              expiryDateWidth;
+            const pillX = cardX + (PDF_LAYOUT.cardWidth - pillWidth) / 2;
+            const pillY = cardY + PDF_LAYOUT.cardPaddingBottom;
+            const pillOpacity = expiryDisplay.isPlaceholder ? PDF_LAYOUT.placeholderOpacity : 1;
+            drawRoundedPill(pillX, pillY, pillWidth, pillHeightValue, pillOpacity);
+            let pillTextX = pillX + PDF_LAYOUT.pillPaddingX;
+            const expiryLabelBaseline =
+              pillY + (pillHeightValue - PDF_LAYOUT.pillLabelFontSize) / 2;
+            page.drawText('Expires', {
+              x: pillTextX,
+              y: expiryLabelBaseline,
+              font: bodyItalicFont,
+              size: PDF_LAYOUT.pillLabelFontSize,
+              color: rgb(0, 0, 0),
+              opacity: pillOpacity,
+            });
+            pillTextX += expiryLabelWidth + PDF_LAYOUT.pillGap;
+            const expiryDateBaseline =
+              pillY + (pillHeightValue - PDF_LAYOUT.pillDateFontSize) / 2;
+            page.drawText(expiryDisplay.text, {
+              x: pillTextX,
+              y: expiryDateBaseline,
+              font: bodyItalicFont,
+              size: PDF_LAYOUT.pillDateFontSize,
+              color: rgb(0, 0, 0),
+              opacity: pillOpacity,
+            });
+
+            const productDisplay = getDisplayValue(tag.productName, placeholders.productName);
+            const blankInnerX = blankX + PDF_LAYOUT.blankPadding;
+            const blankInnerYTop = blankY + blankHeight - PDF_LAYOUT.blankPadding;
+            const blankInnerYBottom = blankY + PDF_LAYOUT.blankPadding;
+            const blankInnerWidth = blankWidth - PDF_LAYOUT.blankPadding * 2;
+            const productLines = wrapTextToWidth(
+              productDisplay.text,
+              bodyBoldFont,
+              PDF_LAYOUT.productFontSize,
+              blankInnerWidth,
+            );
+            const productLineHeight =
+              PDF_LAYOUT.productFontSize * PDF_LAYOUT.productLineHeightMultiplier;
+            const textHeight = productLines.length * productLineHeight;
+            const availableHeight = blankInnerYTop - blankInnerYBottom;
+            const verticalOffset = Math.max(0, (availableHeight - textHeight) / 2);
+            let productBaseline = blankInnerYTop - verticalOffset - PDF_LAYOUT.productFontSize;
+            productLines.forEach((line) => {
+              const lineWidth = bodyBoldFont.widthOfTextAtSize(
+                line,
+                PDF_LAYOUT.productFontSize,
+              );
+              const lineX = blankInnerX + Math.max(0, (blankInnerWidth - lineWidth) / 2);
+              page.drawText(line, {
+                x: lineX,
+                y: productBaseline,
+                font: bodyBoldFont,
+                size: PDF_LAYOUT.productFontSize,
+                color: rgb(0, 0, 0),
+                opacity: productDisplay.isPlaceholder ? PDF_LAYOUT.placeholderOpacity : 1,
+              });
+              productBaseline -= productLineHeight;
+            });
+          }
+
+          const pdfBytes = await pdfDoc.save();
+          const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+          const blobUrl = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = blobUrl;
+          link.download = 'members-price-tags.pdf';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.setTimeout(() => {
+            URL.revokeObjectURL(blobUrl);
+          }, 1000);
+        }
 
         const downloadButton = document.getElementById('downloadPdf');
 
         if (downloadButton) {
           downloadButton.addEventListener('click', async () => {
-            const sheet = document.getElementById('tagSheet');
-            if (!sheet) {
-              return;
-            }
-
-            const pdfGenerator = window.html2pdf;
-            if (typeof pdfGenerator !== 'function') {
-              alert('Unable to generate the PDF right now. Please try using the print option instead.');
-              return;
-            }
-
             updateAllLabels();
-
-            let target = sheet;
-            let cleanup = () => {};
-
-            if (!previewVisible && previewWrapper) {
-              const clone = sheet.cloneNode(true);
-              clone.id = 'tagSheetPdfClone';
-              const mount = document.createElement('div');
-              mount.style.position = 'fixed';
-              mount.style.left = '0';
-              mount.style.top = '0';
-              mount.style.opacity = '0';
-              mount.style.pointerEvents = 'none';
-              mount.style.zIndex = '-1';
-              mount.appendChild(clone);
-              document.body.appendChild(mount);
-
-              clone.querySelectorAll('.price').forEach((priceEl) => {
-                applyPriceScaling(priceEl);
-              });
-
-              target = clone;
-              cleanup = () => {
-                mount.remove();
-              };
-            }
-
-            const htmlRoot = document.documentElement;
-            const previousScrollX = window.scrollX || window.pageXOffset || 0;
-            const previousScrollY = window.scrollY || window.pageYOffset || 0;
-            const previousScrollBehavior = htmlRoot ? htmlRoot.style.scrollBehavior : '';
-
-            if (htmlRoot) {
-              htmlRoot.style.scrollBehavior = 'auto';
-            }
-
-            window.scrollTo(0, 0);
-
             try {
-              await pdfGenerator().set(pdfOptions).from(target).save();
+              await generateVectorPdf(tagData, activeRowCount);
             } catch (error) {
               console.error('Failed to generate PDF', error);
               alert('Sorry, there was a problem generating the PDF. Please try again.');
-            } finally {
-              cleanup();
-              window.scrollTo(previousScrollX, previousScrollY);
-
-              if (htmlRoot) {
-                htmlRoot.style.scrollBehavior = previousScrollBehavior;
-              }
             }
           });
         }
