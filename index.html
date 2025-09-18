@@ -73,17 +73,11 @@
 
       main {
         flex: 1;
-        display: grid;
-        grid-template-columns: minmax(320px, 380px) 1fr;
+        display: flex;
+        flex-direction: column;
         gap: 2rem;
         padding: 2rem 2.5rem 3rem;
-        align-items: flex-start;
-      }
-
-      @media (max-width: 1100px) {
-        main {
-          grid-template-columns: 1fr;
-        }
+        align-items: center;
       }
 
       @media (max-width: 720px) {
@@ -94,9 +88,36 @@
         header {
           padding: 1.25rem 1.5rem;
         }
+
+        .row-controls {
+          flex-direction: column;
+          align-items: stretch;
+          gap: 1.25rem;
+        }
+
+        .add-row-wrapper {
+          justify-content: center;
+          padding-top: 0;
+        }
+
+        .actions {
+          margin-left: 0;
+          width: 100%;
+          justify-content: center;
+        }
+
+        .actions button {
+          flex: 1 1 auto;
+        }
+
+        .controls {
+          padding: 1.5rem;
+        }
       }
 
       .controls {
+        width: 100%;
+        max-width: 1100px;
         background: #ffffff;
         border-radius: 18px;
         box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.22);
@@ -104,14 +125,6 @@
         display: flex;
         flex-direction: column;
         gap: 1.5rem;
-        max-height: calc(100vh - 6rem);
-        overflow: auto;
-      }
-
-      @media (max-width: 1100px) {
-        .controls {
-          max-height: none;
-        }
       }
 
       .controls h2 {
@@ -128,13 +141,23 @@
         color: #4b5563;
       }
 
-      .add-row-wrapper {
+      .row-controls {
         display: flex;
-        justify-content: center;
-        padding: 0.85rem 0;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
       }
 
-      .add-row-button {
+      .add-row-wrapper {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.85rem 0 0;
+      }
+
+      .add-row-button,
+      .duplicate-row-button {
         width: 2.6rem;
         height: 2.6rem;
         border-radius: 999px;
@@ -151,13 +174,28 @@
         transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
       }
 
-      .add-row-button:hover:not(:disabled) {
+      .duplicate-row-button {
+        background: #dbeafe;
+        color: #1e3a8a;
+        font-size: 1.15rem;
+      }
+
+      .add-row-button:hover:not(:disabled),
+      .duplicate-row-button:hover:not(:disabled) {
         transform: translateY(-1px);
         box-shadow: 0 12px 25px -14px rgba(15, 23, 42, 0.45);
+      }
+
+      .add-row-button:hover:not(:disabled) {
         background: #d1d5db;
       }
 
-      .add-row-button:disabled {
+      .duplicate-row-button:hover:not(:disabled) {
+        background: #bfdbfe;
+      }
+
+      .add-row-button:disabled,
+      .duplicate-row-button:disabled {
         opacity: 0.45;
         cursor: not-allowed;
         transform: none;
@@ -235,6 +273,8 @@
         display: flex;
         flex-wrap: wrap;
         gap: 0.75rem;
+        margin-left: auto;
+        justify-content: flex-end;
       }
 
       button {
@@ -273,10 +313,16 @@
       }
 
       .preview-wrapper {
-        display: flex;
+        display: none;
         justify-content: center;
         align-items: flex-start;
         width: 100%;
+        max-width: 1100px;
+        margin: 0 auto;
+      }
+
+      .preview-wrapper.is-visible {
+        display: flex;
       }
 
       .preview-page {
@@ -478,7 +524,9 @@
         }
 
         .preview-wrapper {
+          display: flex !important;
           margin: 0;
+          max-width: none;
           justify-content: flex-start;
         }
 
@@ -524,25 +572,44 @@
             <tbody id="entriesBody"></tbody>
           </table>
         </div>
-        <div class="add-row-wrapper">
-          <button
-            type="button"
-            class="add-row-button"
-            id="addRow"
-            aria-label="Add another entry"
-            title="Add another entry"
-          >
-            +
-          </button>
-        </div>
-        <div class="actions">
-          <button type="button" class="secondary" id="copyFirst">Copy first row to all</button>
-          <button type="button" class="secondary" id="clearAll">Clear entries</button>
-          <button type="button" class="secondary" id="printSheet">Open print preview</button>
-          <button type="button" class="primary" id="downloadPdf">Download PDF</button>
+        <div class="row-controls">
+          <div class="add-row-wrapper">
+            <button
+              type="button"
+              class="add-row-button"
+              id="addRow"
+              aria-label="Add another entry"
+              title="Add another entry"
+            >
+              +
+            </button>
+            <button
+              type="button"
+              class="duplicate-row-button"
+              id="duplicateRow"
+              aria-label="Duplicate last entry"
+              title="Duplicate last entry"
+            >
+              ⧉
+            </button>
+          </div>
+          <div class="actions">
+            <button type="button" class="secondary" id="clearAll">Clear entries</button>
+            <button
+              type="button"
+              class="secondary"
+              id="togglePreview"
+              aria-expanded="false"
+              aria-controls="previewWrapper"
+            >
+              Show preview
+            </button>
+            <button type="button" class="secondary" id="printSheet">Open print preview</button>
+            <button type="button" class="primary" id="downloadPdf">Download PDF</button>
+          </div>
         </div>
       </section>
-      <section class="preview-wrapper" aria-label="Tag preview">
+      <section class="preview-wrapper" id="previewWrapper" aria-label="Tag preview" aria-hidden="true">
         <div class="preview-page" id="tagSheet">
           <div class="label-grid" id="labelGrid"></div>
         </div>
@@ -550,7 +617,6 @@
     </main>
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"
-      integrity="sha512-YcsIPyk2SGLu1qQEbfXDnpa9eKJeNEqXWiwxupCSvJzpuG1HsfrNcrediOYM/qfNwCuWHa3gwPrmT2yEaE+Fw=="
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     ></script>
@@ -587,6 +653,9 @@
 
         const labelGrid = document.getElementById('labelGrid');
         const labelRefs = [];
+        const previewWrapper = document.getElementById('previewWrapper');
+        const previewToggleButton = document.getElementById('togglePreview');
+        let previewVisible = false;
 
         const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
@@ -718,6 +787,30 @@
           }
         }
 
+        function setPreviewVisibility(visible) {
+          previewVisible = visible;
+
+          if (previewWrapper) {
+            previewWrapper.classList.toggle('is-visible', visible);
+            previewWrapper.setAttribute('aria-hidden', visible ? 'false' : 'true');
+          }
+
+          if (previewToggleButton) {
+            previewToggleButton.textContent = visible ? 'Hide preview' : 'Show preview';
+            previewToggleButton.setAttribute('aria-expanded', visible ? 'true' : 'false');
+          }
+
+          if (visible) {
+            updateAllLabels();
+          }
+        }
+
+        if (previewToggleButton) {
+          previewToggleButton.addEventListener('click', () => {
+            setPreviewVisibility(!previewVisible);
+          });
+        }
+
         const entriesBody = document.getElementById('entriesBody');
         const fields = [
           { key: 'productName', placeholder: 'Product name' },
@@ -803,6 +896,7 @@
         });
 
         const addRowButton = document.getElementById('addRow');
+        const duplicateRowButton = document.getElementById('duplicateRow');
 
         function setActiveRowCount(newCount) {
           const clamped = clamp(newCount, 1, MAX_TAGS);
@@ -814,6 +908,10 @@
 
           if (addRowButton) {
             addRowButton.disabled = activeRowCount >= MAX_TAGS;
+          }
+
+          if (duplicateRowButton) {
+            duplicateRowButton.disabled = activeRowCount >= MAX_TAGS;
           }
 
           updateAllLabels();
@@ -828,14 +926,19 @@
           });
         }
 
-        document.getElementById('copyFirst').addEventListener('click', () => {
-          const base = { ...tagData[0] };
-          for (let i = 1; i < activeRowCount; i += 1) {
-            tagData[i] = { ...base };
-          }
-          syncInputsFromData();
-          updateAllLabels();
-        });
+        if (duplicateRowButton) {
+          duplicateRowButton.addEventListener('click', () => {
+            if (activeRowCount >= MAX_TAGS) {
+              return;
+            }
+
+            const sourceIndex = Math.max(activeRowCount - 1, 0);
+            const base = { ...tagData[sourceIndex] };
+            tagData[activeRowCount] = { ...base };
+            setActiveRowCount(activeRowCount + 1);
+            syncInputsFromData();
+          });
+        }
 
         document.getElementById('clearAll').addEventListener('click', () => {
           tagData.forEach((item) => {
@@ -850,6 +953,7 @@
           setActiveRowCount(1);
         });
 
+        setPreviewVisibility(false);
         setActiveRowCount(1);
         syncInputsFromData();
 
@@ -873,14 +977,79 @@
           jsPDF: { unit: 'cm', format: 'a4', orientation: 'portrait' },
         };
 
-        document.getElementById('downloadPdf').addEventListener('click', () => {
-          const sheet = document.getElementById('tagSheet');
-          html2pdf().set(pdfOptions).from(sheet).save();
-        });
+        const downloadButton = document.getElementById('downloadPdf');
 
-        document.getElementById('printSheet').addEventListener('click', () => {
-          window.print();
-        });
+        if (downloadButton) {
+          downloadButton.addEventListener('click', async () => {
+            const sheet = document.getElementById('tagSheet');
+            if (!sheet) {
+              return;
+            }
+
+            const pdfGenerator = window.html2pdf;
+            if (typeof pdfGenerator !== 'function') {
+              alert('Unable to generate the PDF right now. Please try using the print option instead.');
+              return;
+            }
+
+            updateAllLabels();
+
+            let target = sheet;
+            let cleanup = () => {};
+
+            if (!previewVisible && previewWrapper) {
+              const clone = sheet.cloneNode(true);
+              clone.id = 'tagSheetPdfClone';
+              const mount = document.createElement('div');
+              mount.style.position = 'fixed';
+              mount.style.left = '0';
+              mount.style.top = '0';
+              mount.style.opacity = '0';
+              mount.style.pointerEvents = 'none';
+              mount.style.zIndex = '-1';
+              mount.appendChild(clone);
+              document.body.appendChild(mount);
+
+              clone.querySelectorAll('.price').forEach((priceEl) => {
+                applyPriceScaling(priceEl);
+              });
+
+              target = clone;
+              cleanup = () => {
+                mount.remove();
+              };
+            }
+
+            try {
+              await pdfGenerator().set(pdfOptions).from(target).save();
+            } catch (error) {
+              console.error('Failed to generate PDF', error);
+              alert('Sorry, there was a problem generating the PDF. Please try again.');
+            } finally {
+              cleanup();
+            }
+          });
+        }
+
+        const printButton = document.getElementById('printSheet');
+
+        if (printButton) {
+          printButton.addEventListener('click', () => {
+            const shouldHideAfter = !previewVisible;
+
+            if (shouldHideAfter) {
+              setPreviewVisibility(true);
+            } else {
+              updateAllLabels();
+            }
+
+            window.print();
+
+            if (shouldHideAfter) {
+              setPreviewVisibility(false);
+            }
+          });
+        }
       })();
     </script>
   </body>
