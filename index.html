@@ -38,7 +38,7 @@
         --body-font: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
         --display-font: 'FontNumbers', 'Barlow Condensed', 'Impact', sans-serif;
         --heading-font: 'Impact', 'Impact Regular', 'Arial Black', sans-serif;
-        --heading-height-scale: 1;
+        --heading-height-scale: 1.15;
         --price-height-scale: 1;
         --unit-height-scale: 1;
         --expiry-height-scale: 1;
@@ -421,7 +421,7 @@
         font-size: 0.24cm;
         font-weight: 400;
         letter-spacing: 0.06em;
-        text-transform: uppercase;
+        text-transform: none;
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -512,13 +512,6 @@
           </p>
           <div class="scale-controls">
             <div class="scale-row">
-              <label for="headingHeight">Heading height</label>
-              <div class="scale-input">
-                <input type="range" id="headingHeight" min="0.6" max="1.4" step="0.01" value="1" />
-                <output id="headingHeightValue" class="scale-output" for="headingHeight">1.00×</output>
-              </div>
-            </div>
-            <div class="scale-row">
               <label for="priceHeight">Price height</label>
               <div class="scale-input">
                 <input type="range" id="priceHeight" min="0.6" max="1.5" step="0.01" value="1" />
@@ -598,7 +591,6 @@
 
         const rootElement = document.documentElement;
         const heightControls = [
-          { id: 'headingHeight', variable: '--heading-height-scale', output: 'headingHeightValue' },
           { id: 'priceHeight', variable: '--price-height-scale', output: 'priceHeightValue' },
           { id: 'unitHeight', variable: '--unit-height-scale', output: 'unitHeightValue' },
           { id: 'expiryHeight', variable: '--expiry-height-scale', output: 'expiryHeightValue' },
