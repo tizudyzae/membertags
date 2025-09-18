@@ -729,6 +729,11 @@
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/@pdf-lib/fontkit@0.0.4/dist/fontkit.umd.min.js"
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
     <script>
       (function () {
         const COLUMN_COUNT = 2;
@@ -1414,18 +1419,38 @@
           const pdfDoc = await PDFDocument.create();
           const page = pdfDoc.addPage([PDF_LAYOUT.pageWidth, PDF_LAYOUT.pageHeight]);
 
-          const impactBytes = getEmbeddedFontBytes('Impact');
-          const numbersBytes = getEmbeddedFontBytes('FontNumbers');
+          let canEmbedCustomFonts = false;
+          if (typeof pdfDoc.registerFontkit === 'function' && window.fontkit) {
+            try {
+              pdfDoc.registerFontkit(window.fontkit);
+              canEmbedCustomFonts = true;
+            } catch (error) {
+              console.warn('Unable to register custom font support', error);
+            }
+          }
 
-          const headingFont = impactBytes
-            ? await pdfDoc.embedFont(impactBytes, { subset: true })
-            : await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-          const pricePrimaryFont = numbersBytes
-            ? await pdfDoc.embedFont(numbersBytes, { subset: true })
-            : headingFont;
-          const priceFallbackFont = headingFont;
           const bodyBoldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
           const bodyItalicFont = await pdfDoc.embedFont(StandardFonts.HelveticaOblique);
+
+          const loadCustomFont = async (familyName, fallbackFont) => {
+            if (!canEmbedCustomFonts) {
+              return fallbackFont;
+            }
+            const fontBytes = getEmbeddedFontBytes(familyName);
+            if (!fontBytes) {
+              return fallbackFont;
+            }
+            try {
+              return await pdfDoc.embedFont(fontBytes, { subset: true });
+            } catch (error) {
+              console.warn(`Unable to embed font "${familyName}"`, error);
+              return fallbackFont;
+            }
+          };
+
+          const headingFont = await loadCustomFont('Impact', bodyBoldFont);
+          const pricePrimaryFont = await loadCustomFont('FontNumbers', headingFont);
+          const priceFallbackFont = headingFont;
 
           const normalizedCount = Number.isFinite(activeCount) ? activeCount : 0;
           const tagsToRender = Math.max(
