@@ -39,7 +39,7 @@
         --display-font: 'FontNumbers', 'Barlow Condensed', 'Impact', sans-serif;
         --heading-font: 'Impact', 'Impact Regular', 'Arial Black', sans-serif;
         --heading-height-scale: 1.15;
-        --price-height-scale: 1;
+        --price-scale: 1;
         --unit-height-scale: 1;
         --expiry-height-scale: 1;
       }
@@ -128,59 +128,40 @@
         color: #4b5563;
       }
 
-      .controls h3 {
-        margin: 0;
-        font-size: 0.9rem;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
-      }
-
-      .control-section {
+      .add-row-wrapper {
         display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
+        justify-content: center;
+        padding: 0.85rem 0;
       }
 
-      .control-description {
-        margin: 0;
-        font-size: 0.8rem;
-        line-height: 1.4;
-        color: #6b7280;
-      }
-
-      .scale-controls {
-        display: grid;
-        gap: 0.85rem;
-      }
-
-      .scale-row {
-        display: grid;
-        gap: 0.4rem;
-      }
-
-      .scale-row label {
-        font-size: 0.78rem;
-        letter-spacing: 0.04em;
-        text-transform: uppercase;
-        color: #4b5563;
-      }
-
-      .scale-input {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-      }
-
-      .scale-input input[type='range'] {
-        flex: 1;
-      }
-
-      .scale-output {
-        font-size: 0.78rem;
-        font-variant-numeric: tabular-nums;
-        min-width: 3.5ch;
-        text-align: right;
+      .add-row-button {
+        width: 2.6rem;
+        height: 2.6rem;
+        border-radius: 999px;
+        border: none;
+        background: #e5e7eb;
         color: #111827;
+        font-size: 1.4rem;
+        font-weight: 600;
+        line-height: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
+      }
+
+      .add-row-button:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 12px 25px -14px rgba(15, 23, 42, 0.45);
+        background: #d1d5db;
+      }
+
+      .add-row-button:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
       }
 
       .entries-table-wrapper {
@@ -384,8 +365,9 @@
         line-height: 0.7;
         font-weight: 400;
         letter-spacing: 0.01em;
-        transform: scaleY(var(--price-height-scale));
+        transform: scale(var(--price-scale, 1));
         transform-origin: center;
+        white-space: nowrap;
       }
 
       .unit-line {
@@ -505,35 +487,6 @@
             Enter the price, unit price, unit, and end date for each tag. The layout of every tag matches the provided mock-up.
           </p>
         </div>
-        <div class="control-section" aria-label="Font height adjustments">
-          <h3>Font height adjustments</h3>
-          <p class="control-description">
-            Change the vertical stretch of each typographic element without altering its width to fine-tune printed tags.
-          </p>
-          <div class="scale-controls">
-            <div class="scale-row">
-              <label for="priceHeight">Price height</label>
-              <div class="scale-input">
-                <input type="range" id="priceHeight" min="0.6" max="1.5" step="0.01" value="1" />
-                <output id="priceHeightValue" class="scale-output" for="priceHeight">1.00×</output>
-              </div>
-            </div>
-            <div class="scale-row">
-              <label for="unitHeight">Unit line height</label>
-              <div class="scale-input">
-                <input type="range" id="unitHeight" min="0.6" max="1.4" step="0.01" value="1" />
-                <output id="unitHeightValue" class="scale-output" for="unitHeight">1.00×</output>
-              </div>
-            </div>
-            <div class="scale-row">
-              <label for="expiryHeight">Expiry height</label>
-              <div class="scale-input">
-                <input type="range" id="expiryHeight" min="0.6" max="1.4" step="0.01" value="1" />
-                <output id="expiryHeightValue" class="scale-output" for="expiryHeight">1.00×</output>
-              </div>
-            </div>
-          </div>
-        </div>
         <div class="entries-table-wrapper">
           <table class="entries-table">
             <thead>
@@ -547,6 +500,17 @@
             </thead>
             <tbody id="entriesBody"></tbody>
           </table>
+        </div>
+        <div class="add-row-wrapper">
+          <button
+            type="button"
+            class="add-row-button"
+            id="addRow"
+            aria-label="Add another entry"
+            title="Add another entry"
+          >
+            +
+          </button>
         </div>
         <div class="actions">
           <button type="button" class="secondary" id="copyFirst">Copy first row to all</button>
@@ -571,7 +535,8 @@
       (function () {
         const COLUMN_COUNT = 2;
         const ROW_COUNT = 7;
-        const TAG_COUNT = COLUMN_COUNT * ROW_COUNT;
+        const MAX_TAGS = COLUMN_COUNT * ROW_COUNT;
+
         const placeholders = {
           price: '£0.00',
           unitPrice: '£0.00',
@@ -579,46 +544,19 @@
           endDate: 'DD/MM/YYYY',
         };
 
-        const tagData = Array.from({ length: TAG_COUNT }, () => ({
+        const tagData = Array.from({ length: MAX_TAGS }, () => ({
           price: '',
           unitPrice: '',
           unit: '',
           endDate: '',
         }));
 
+        let activeRowCount = 0;
+
         const labelGrid = document.getElementById('labelGrid');
         const labelRefs = [];
 
-        const rootElement = document.documentElement;
-        const heightControls = [
-          { id: 'priceHeight', variable: '--price-height-scale', output: 'priceHeightValue' },
-          { id: 'unitHeight', variable: '--unit-height-scale', output: 'unitHeightValue' },
-          { id: 'expiryHeight', variable: '--expiry-height-scale', output: 'expiryHeightValue' },
-        ];
-
         const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
-
-        heightControls.forEach(({ id, variable, output }) => {
-          const input = document.getElementById(id);
-          const outputEl = document.getElementById(output);
-          if (!input || !outputEl) return;
-
-          const min = Number.parseFloat(input.min) || 0.5;
-          const max = Number.parseFloat(input.max) || 1.5;
-
-          const applyValue = (raw) => {
-            const numeric = clamp(Number.parseFloat(raw) || 1, min, max);
-            const formatted = numeric.toFixed(2);
-            rootElement.style.setProperty(variable, formatted);
-            outputEl.textContent = `${formatted}×`;
-          };
-
-          applyValue(input.value);
-
-          input.addEventListener('input', (event) => {
-            applyValue(event.currentTarget.value);
-          });
-        });
 
         function createLabel(index) {
           const label = document.createElement('div');
@@ -646,10 +584,10 @@
           const expiryEl = label.querySelector('[data-role="end-date"]');
           const expiryPill = label.querySelector('[data-role="expiry"]');
           labelGrid.appendChild(label);
-          labelRefs[index] = { priceEl, unitPriceEl, unitEl, unitLineEl, expiryEl, expiryPill };
+          labelRefs[index] = { label, priceEl, unitPriceEl, unitEl, unitLineEl, expiryEl, expiryPill };
         }
 
-        for (let i = 0; i < TAG_COUNT; i += 1) {
+        for (let i = 0; i < MAX_TAGS; i += 1) {
           createLabel(i);
         }
 
@@ -674,9 +612,43 @@
           }
         }
 
+        function applyPriceScaling(priceEl) {
+          if (!priceEl) return;
+
+          priceEl.style.setProperty('--price-scale', '1');
+
+          if (priceEl.offsetParent === null) {
+            return;
+          }
+
+          const availableWidth = priceEl.clientWidth;
+          const availableHeight = priceEl.clientHeight;
+          const requiredWidth = priceEl.scrollWidth;
+          const requiredHeight = priceEl.scrollHeight;
+
+          if (!availableWidth || !availableHeight || !requiredWidth || !requiredHeight) {
+            return;
+          }
+
+          const widthRatio = availableWidth / requiredWidth;
+          const heightRatio = availableHeight / requiredHeight;
+          const scale = Math.min(1, widthRatio, heightRatio);
+
+          priceEl.style.setProperty('--price-scale', scale < 1 ? scale.toFixed(3) : '1');
+        }
+
         function updateLabel(index) {
-          const data = tagData[index];
           const refs = labelRefs[index];
+          if (!refs) return;
+
+          const isActive = index < activeRowCount;
+          refs.label.style.display = isActive ? 'grid' : 'none';
+
+          if (!isActive) {
+            return;
+          }
+
+          const data = tagData[index];
           setText(refs.priceEl, data.price, placeholders.price);
           setText(refs.unitPriceEl, data.unitPrice, placeholders.unitPrice);
           setText(refs.unitEl, data.unit, placeholders.unit);
@@ -685,10 +657,12 @@
           const hasUnitDetails = Boolean((data.unitPrice || '').trim() || (data.unit || '').trim());
           refs.unitLineEl.dataset.empty = hasUnitDetails ? 'false' : 'true';
           refs.expiryPill.dataset.empty = refs.expiryEl.dataset.empty;
+
+          applyPriceScaling(refs.priceEl);
         }
 
         function updateAllLabels() {
-          for (let i = 0; i < TAG_COUNT; i += 1) {
+          for (let i = 0; i < MAX_TAGS; i += 1) {
             updateLabel(i);
           }
         }
@@ -701,8 +675,12 @@
           { key: 'endDate', placeholder: '14/08/2025' },
         ];
 
+        const entryRows = [];
+
         tagData.forEach((_, index) => {
           const row = document.createElement('tr');
+          row.dataset.index = index;
+
           const indexCell = document.createElement('td');
           indexCell.textContent = index + 1;
           row.appendChild(indexCell);
@@ -721,7 +699,9 @@
             row.appendChild(cell);
           });
 
+          row.hidden = true;
           entriesBody.appendChild(row);
+          entryRows.push(row);
         });
 
         const entryInputs = Array.from(document.querySelectorAll('.entry-input'));
@@ -744,12 +724,35 @@
           });
         });
 
-        syncInputsFromData();
-        updateAllLabels();
+        const addRowButton = document.getElementById('addRow');
+
+        function setActiveRowCount(newCount) {
+          const clamped = clamp(newCount, 1, MAX_TAGS);
+          activeRowCount = clamped;
+
+          entryRows.forEach((row, index) => {
+            row.hidden = index >= activeRowCount;
+          });
+
+          if (addRowButton) {
+            addRowButton.disabled = activeRowCount >= MAX_TAGS;
+          }
+
+          updateAllLabels();
+        }
+
+        if (addRowButton) {
+          addRowButton.addEventListener('click', () => {
+            if (activeRowCount < MAX_TAGS) {
+              setActiveRowCount(activeRowCount + 1);
+              syncInputsFromData();
+            }
+          });
+        }
 
         document.getElementById('copyFirst').addEventListener('click', () => {
           const base = { ...tagData[0] };
-          for (let i = 1; i < TAG_COUNT; i += 1) {
+          for (let i = 1; i < activeRowCount; i += 1) {
             tagData[i] = { ...base };
           }
           syncInputsFromData();
@@ -764,6 +767,21 @@
             item.endDate = '';
           });
           syncInputsFromData();
+          setActiveRowCount(1);
+        });
+
+        setActiveRowCount(1);
+        syncInputsFromData();
+
+        if (document.fonts && document.fonts.ready) {
+          document.fonts.ready.then(() => {
+            updateAllLabels();
+          });
+        } else {
+          updateAllLabels();
+        }
+
+        window.addEventListener('resize', () => {
           updateAllLabels();
         });
 
