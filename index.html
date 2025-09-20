@@ -437,6 +437,14 @@
         overflow: hidden;
       }
 
+      .preview-page.is-pdf-export {
+        box-shadow: none;
+      }
+
+      .preview-page.is-pdf-export::after {
+        display: none;
+      }
+
       .preview-page::after {
         content: '';
         position: absolute;
@@ -1226,6 +1234,10 @@
               };
             }
 
+            if (target && target.classList) {
+              target.classList.add('is-pdf-export');
+            }
+
             const htmlRoot = document.documentElement;
             const previousScrollX = window.scrollX || window.pageXOffset || 0;
             const previousScrollY = window.scrollY || window.pageYOffset || 0;
@@ -1243,6 +1255,9 @@
               console.error('Failed to generate PDF', error);
               alert('Sorry, there was a problem generating the PDF. Please try again.');
             } finally {
+              if (target && target.classList) {
+                target.classList.remove('is-pdf-export');
+              }
               cleanup();
               window.scrollTo(previousScrollX, previousScrollY);
 
