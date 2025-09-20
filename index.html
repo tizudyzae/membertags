@@ -489,6 +489,33 @@
         width: 100%;
         height: 100%;
         border-radius: 0;
+        justify-content: flex-start;
+      }
+
+      .label-card-body {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: flex-start;
+        gap: 0.09cm;
+        flex: 1 1 auto;
+      }
+
+      .label-card[data-has-expiry='false'] .label-card-body {
+        justify-content: space-evenly;
+      }
+
+      .label-card[data-has-expiry='false'] .tag-heading,
+      .label-card[data-has-expiry='false'] .price,
+      .label-card[data-has-expiry='false'] .unit-line {
+        flex: 1 1 auto;
+      }
+
+      .label-card[data-has-expiry='false'] .tag-heading,
+      .label-card[data-has-expiry='false'] .price {
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
 
       .label-card .tag-heading,
@@ -590,6 +617,10 @@
         font-style: italic;
         transform: scaleY(var(--expiry-height-scale));
         transform-origin: center;
+      }
+
+      .expiry-pill[data-empty='true'] {
+        display: none;
       }
 
       .expiry-pill span {
@@ -780,23 +811,26 @@
           const label = document.createElement('div');
           label.className = 'label';
           label.innerHTML = `
-            <div class="label-card">
-              <div class="tag-heading">Members Price</div>
-              <div class="price" data-role="price">${placeholders.price}</div>
-              <div class="unit-line" data-role="unit-line">
-                <span class="unit-price" data-role="unit-price">${placeholders.unitPrice}</span>
-                <span class="unit-separator">per</span>
-                <span class="unit-text" data-role="unit">${placeholders.unit}</span>
+            <div class="label-card" data-has-expiry="false">
+              <div class="label-card-body">
+                <div class="tag-heading">Members Price</div>
+                <div class="price" data-role="price">${placeholders.price}</div>
+                <div class="unit-line" data-role="unit-line">
+                  <span class="unit-price" data-role="unit-price">${placeholders.unitPrice}</span>
+                  <span class="unit-separator">per</span>
+                  <span class="unit-text" data-role="unit">${placeholders.unit}</span>
+                </div>
               </div>
-              <div class="expiry-pill" data-role="expiry">
+              <div class="expiry-pill" data-role="expiry" data-empty="true" aria-hidden="true">
                 <span class="expiry-label">Expires</span>
-                <span class="expiry-date" data-role="end-date">${placeholders.endDate}</span>
+                <span class="expiry-date" data-role="end-date" data-empty="true">${placeholders.endDate}</span>
               </div>
             </div>
             <div class="label-blank">
               <div class="product-name" data-role="product-name">${placeholders.productName}</div>
             </div>
           `;
+          const cardEl = label.querySelector('.label-card');
           const productNameEl = label.querySelector('[data-role="product-name"]');
           const priceEl = label.querySelector('[data-role="price"]');
           const unitPriceEl = label.querySelector('[data-role="unit-price"]');
@@ -807,6 +841,7 @@
           labelGrid.appendChild(label);
           labelRefs[index] = {
             label,
+            cardEl,
             productNameEl,
             priceEl,
             unitPriceEl,
@@ -909,9 +944,15 @@
           setText(refs.unitEl, data.unit, placeholders.unit);
           const formattedDate = formatDate(data.endDate);
           setText(refs.expiryEl, formattedDate, placeholders.endDate);
+          const expiryIsEmpty = refs.expiryEl.dataset.empty === 'true';
+          refs.expiryPill.dataset.empty = expiryIsEmpty ? 'true' : 'false';
+          refs.expiryPill.hidden = expiryIsEmpty;
+          refs.expiryPill.setAttribute('aria-hidden', expiryIsEmpty ? 'true' : 'false');
+          if (refs.cardEl) {
+            refs.cardEl.dataset.hasExpiry = expiryIsEmpty ? 'false' : 'true';
+          }
           const hasUnitDetails = Boolean((data.unitPrice || '').trim() || (data.unit || '').trim());
           refs.unitLineEl.dataset.empty = hasUnitDetails ? 'false' : 'true';
-          refs.expiryPill.dataset.empty = refs.expiryEl.dataset.empty;
 
           const selectedColor = (data.tagColor || '').trim().toLowerCase();
           const matchingColor =
