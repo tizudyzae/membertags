@@ -30,6 +30,9 @@
         --column-gap: 0cm;
         --row-gap: 0cm;
         --tag-width: 10.5cm;
+        --layout-offset: 0cm;
+        --tag-width-first: calc(var(--tag-width) - var(--layout-offset));
+        --tag-width-second: var(--tag-width);
         --tag-height: 3.7cm;
         --tag-bg: #00A1CC;
         --tag-text: #ffffff;
@@ -80,6 +83,16 @@
         align-items: center;
       }
 
+      body[data-layout-mode='full-bleed'] {
+        --layout-offset: 0cm;
+        --page-padding-left: 0cm;
+      }
+
+      body[data-layout-mode='hp-offset'] {
+        --layout-offset: 0.5cm;
+        --page-padding-left: var(--layout-offset);
+      }
+
       @media (max-width: 720px) {
         main {
           padding: 1.5rem;
@@ -111,6 +124,10 @@
 
         .actions button {
           flex: none;
+          width: 100%;
+        }
+
+        .layout-mode-control {
           width: 100%;
         }
 
@@ -212,6 +229,40 @@
         align-items: center;
         gap: 1rem;
         flex-wrap: wrap;
+      }
+
+      .layout-mode-control {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.35rem;
+        min-width: 11rem;
+      }
+
+      .layout-mode-label {
+        font-size: 0.7rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #6b7280;
+        font-weight: 600;
+      }
+
+      .layout-mode-select {
+        width: 100%;
+        border-radius: 10px;
+        border: 1px solid #d1d5db;
+        background: #ffffff;
+        padding: 0.45rem 0.55rem;
+        font-family: inherit;
+        font-size: 0.9rem;
+        color: #111827;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .layout-mode-select:focus {
+        outline: none;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
       }
 
       .add-row-wrapper {
@@ -374,6 +425,7 @@
         flex-wrap: wrap;
         gap: 0.75rem;
         margin-left: auto;
+        align-items: center;
         justify-content: flex-end;
       }
 
@@ -459,7 +511,7 @@
         width: 100%;
         height: 100%;
         display: grid;
-        grid-template-columns: repeat(2, var(--tag-width));
+        grid-template-columns: var(--tag-width-first) var(--tag-width-second);
         grid-auto-rows: var(--tag-height);
         column-gap: var(--column-gap);
         row-gap: var(--row-gap);
@@ -468,7 +520,7 @@
       }
 
       .label {
-        width: var(--tag-width);
+        width: 100%;
         height: var(--tag-height);
         display: grid;
         grid-template-columns: 3.7cm 1fr;
@@ -733,6 +785,13 @@
             </button>
           </div>
           <div class="actions">
+            <div class="layout-mode-control">
+              <label class="layout-mode-label" for="layoutMode">Print layout</label>
+              <select id="layoutMode" name="layoutMode" class="layout-mode-select">
+                <option value="full-bleed" selected>Full Bleed</option>
+                <option value="hp-offset">HP Offset</option>
+              </select>
+            </div>
             <button type="button" class="secondary" id="clearAll">Clear entries</button>
             <button
               type="button"
@@ -776,6 +835,13 @@
         ];
         const DEFAULT_TAG_COLOR = TAG_COLOR_OPTIONS[0].value;
 
+        const LAYOUT_MODES = {
+          FULL_BLEED: 'full-bleed',
+          HP_OFFSET: 'hp-offset',
+        };
+        const VALID_LAYOUT_MODES = new Set(Object.values(LAYOUT_MODES));
+        const DEFAULT_LAYOUT_MODE = LAYOUT_MODES.FULL_BLEED;
+
         const placeholders = {
           productName: 'Product name',
           price: '£0.00',
@@ -797,9 +863,11 @@
 
         const labelGrid = document.getElementById('labelGrid');
         const labelRefs = [];
+        const layoutModeSelect = document.getElementById('layoutMode');
         const previewWrapper = document.getElementById('previewWrapper');
         const previewToggleButton = document.getElementById('togglePreview');
         let previewVisible = false;
+        let currentLayoutMode = null;
 
         const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
         const PRICE_DOUBLE_DIGIT_THRESHOLD = 9.99;
@@ -969,6 +1037,32 @@
           }
         }
 
+        function normalizeLayoutMode(value) {
+          if (typeof value !== 'string') {
+            return DEFAULT_LAYOUT_MODE;
+          }
+
+          const normalized = value.trim().toLowerCase();
+          return VALID_LAYOUT_MODES.has(normalized) ? normalized : DEFAULT_LAYOUT_MODE;
+        }
+
+        function applyLayoutMode(nextMode) {
+          const normalized = normalizeLayoutMode(nextMode);
+
+          if (document.body && document.body.dataset.layoutMode !== normalized) {
+            document.body.dataset.layoutMode = normalized;
+          }
+
+          if (layoutModeSelect && layoutModeSelect.value !== normalized) {
+            layoutModeSelect.value = normalized;
+          }
+
+          if (currentLayoutMode !== normalized) {
+            currentLayoutMode = normalized;
+            updateAllLabels();
+          }
+        }
+
         function setPreviewVisibility(visible) {
           previewVisible = visible;
 
@@ -990,6 +1084,12 @@
         if (previewToggleButton) {
           previewToggleButton.addEventListener('click', () => {
             setPreviewVisibility(!previewVisible);
+          });
+        }
+
+        if (layoutModeSelect) {
+          layoutModeSelect.addEventListener('change', (event) => {
+            applyLayoutMode(event.currentTarget.value);
           });
         }
 
@@ -1216,6 +1316,7 @@
         setPreviewVisibility(false);
         setActiveRowCount(1);
         syncInputsFromData();
+        applyLayoutMode(layoutModeSelect ? layoutModeSelect.value : DEFAULT_LAYOUT_MODE);
 
         if (document.fonts && document.fonts.ready) {
           document.fonts.ready.then(() => {
