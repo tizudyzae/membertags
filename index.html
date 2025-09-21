@@ -33,6 +33,7 @@
         --layout-offset: 0cm;
         --tag-width-first: var(--tag-width);
         --tag-width-second: var(--tag-width);
+        --column-template: var(--tag-width-first) var(--tag-width-second);
         --tag-height: 3.7cm;
         --tag-bg: #00A1CC;
         --tag-text: #ffffff;
@@ -45,6 +46,7 @@
         --price-scale: 1;
         --unit-height-scale: 1;
         --expiry-height-scale: 1;
+        --product-name-scale: 1;
       }
 
       *,
@@ -81,6 +83,24 @@
         gap: 2rem;
         padding: 2rem 2.5rem 3rem;
         align-items: center;
+      }
+
+      body[data-paper-size='large'] {
+        --tag-width: 10.5cm;
+        --tag-width-first: var(--tag-width);
+        --tag-width-second: var(--tag-width);
+        --column-template: var(--tag-width-first) var(--tag-width-second);
+        --tag-height: 3.7cm;
+        --product-name-scale: 1;
+      }
+
+      body[data-paper-size='normal'] {
+        --tag-width: 7cm;
+        --tag-width-first: var(--tag-width);
+        --tag-width-second: var(--tag-width);
+        --column-template: var(--tag-width-first) var(--tag-width-second) var(--tag-width);
+        --tag-height: 3.76cm;
+        --product-name-scale: 0.8;
       }
 
       body[data-layout-mode='full-bleed'] {
@@ -513,7 +533,7 @@
         width: 100%;
         height: 100%;
         display: grid;
-        grid-template-columns: var(--tag-width-first) var(--tag-width-second);
+        grid-template-columns: var(--column-template);
         grid-auto-rows: var(--tag-height);
         column-gap: var(--column-gap);
         row-gap: var(--row-gap);
@@ -590,7 +610,7 @@
       .product-name {
         font-family: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
         font-weight: 600;
-        font-size: 0.6cm;
+        font-size: calc(0.6cm * var(--product-name-scale));
         color: #000000;
         text-align: center;
         line-height: 1.1;
@@ -788,6 +808,13 @@
           </div>
           <div class="actions">
             <div class="layout-mode-control">
+              <label class="layout-mode-label" for="paperSize">Paper size</label>
+              <select id="paperSize" name="paperSize" class="layout-mode-select">
+                <option value="large" selected>Large SEL (2 × 7)</option>
+                <option value="normal">Normal SEL (3 × 7)</option>
+              </select>
+            </div>
+            <div class="layout-mode-control">
               <label class="layout-mode-label" for="layoutMode">Print layout</label>
               <select id="layoutMode" name="layoutMode" class="layout-mode-select">
                 <option value="full-bleed" selected>Full Bleed</option>
@@ -827,9 +854,23 @@
     ></script>
     <script>
       (function () {
-        const COLUMN_COUNT = 2;
-        const ROW_COUNT = 7;
-        const MAX_TAGS = COLUMN_COUNT * ROW_COUNT;
+        const PAPER_SIZES = {
+          large: { rows: 7, columns: 2 },
+          normal: { rows: 7, columns: 3 },
+        };
+        const DEFAULT_PAPER_SIZE = 'large';
+        const PAPER_SIZE_KEYS = Object.keys(PAPER_SIZES);
+        const TOTAL_LABEL_SLOTS =
+          PAPER_SIZE_KEYS.reduce((max, key) => {
+            const config = PAPER_SIZES[key];
+            if (!config) {
+              return max;
+            }
+            const total = Number(config.rows) * Number(config.columns);
+            return Number.isFinite(total) && total > max ? total : max;
+          }, 0) || 1;
+
+        const VALID_PAPER_SIZES = new Set(PAPER_SIZE_KEYS);
 
         const TAG_COLOR_OPTIONS = [
           { value: '#00A1CC', label: 'Teal (#00A1CC)' },
@@ -852,7 +893,7 @@
           endDate: 'DD/MM/YYYY',
         };
 
-        const tagData = Array.from({ length: MAX_TAGS }, () => ({
+        const tagData = Array.from({ length: TOTAL_LABEL_SLOTS }, () => ({
           productName: '',
           price: '',
           unitPrice: '',
@@ -865,17 +906,43 @@
 
         const labelGrid = document.getElementById('labelGrid');
         const labelRefs = [];
+        const paperSizeSelect = document.getElementById('paperSize');
         const layoutModeSelect = document.getElementById('layoutMode');
         const previewWrapper = document.getElementById('previewWrapper');
         const previewToggleButton = document.getElementById('togglePreview');
         let previewVisible = false;
         let currentLayoutMode = null;
+        let currentPaperSize = DEFAULT_PAPER_SIZE;
 
         const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
         const PRICE_DOUBLE_DIGIT_THRESHOLD = 9.99;
         const PRICE_TRIPLE_DIGIT_THRESHOLD = 99.99;
         const PRICE_DOUBLE_DIGIT_SCALE = 0.8;
         const PRICE_TRIPLE_DIGIT_SCALE = 0.67;
+
+        function normalizePaperSize(value) {
+          if (typeof value !== 'string') {
+            return DEFAULT_PAPER_SIZE;
+          }
+
+          const normalized = value.trim().toLowerCase();
+          return VALID_PAPER_SIZES.has(normalized) ? normalized : DEFAULT_PAPER_SIZE;
+        }
+
+        function getPaperSizeConfig(sizeKey) {
+          const normalized = normalizePaperSize(sizeKey);
+          return PAPER_SIZES[normalized] || PAPER_SIZES[DEFAULT_PAPER_SIZE];
+        }
+
+        function getMaxTagCountForPaper(sizeKey) {
+          const config = getPaperSizeConfig(sizeKey);
+          const total = Number(config?.rows) * Number(config?.columns);
+          return Number.isFinite(total) && total > 0 ? total : 1;
+        }
+
+        function getCurrentMaxTagCount() {
+          return getMaxTagCountForPaper(currentPaperSize);
+        }
 
         function createLabel(index) {
           const label = document.createElement('div');
@@ -922,7 +989,7 @@
           };
         }
 
-        for (let i = 0; i < MAX_TAGS; i += 1) {
+        for (let i = 0; i < TOTAL_LABEL_SLOTS; i += 1) {
           createLabel(i);
         }
 
@@ -1000,7 +1067,9 @@
           const refs = labelRefs[index];
           if (!refs) return;
 
-          const isActive = index < activeRowCount;
+          const maxForCurrent = getCurrentMaxTagCount();
+          const isWithinPaper = index < maxForCurrent;
+          const isActive = isWithinPaper && index < activeRowCount;
           refs.label.style.display = isActive ? 'grid' : 'none';
 
           if (!isActive) {
@@ -1034,9 +1103,27 @@
         }
 
         function updateAllLabels() {
-          for (let i = 0; i < MAX_TAGS; i += 1) {
+          for (let i = 0; i < TOTAL_LABEL_SLOTS; i += 1) {
             updateLabel(i);
           }
+        }
+
+        function applyPaperSize(nextSize) {
+          const normalized = normalizePaperSize(nextSize);
+
+          currentPaperSize = normalized;
+
+          if (document.body && document.body.dataset.paperSize !== normalized) {
+            document.body.dataset.paperSize = normalized;
+          }
+
+          if (paperSizeSelect && paperSizeSelect.value !== normalized) {
+            paperSizeSelect.value = normalized;
+          }
+
+          const maxForCurrent = getCurrentMaxTagCount();
+          const desiredCount = activeRowCount > 0 ? activeRowCount : 1;
+          setActiveRowCount(Math.min(desiredCount, maxForCurrent));
         }
 
         function normalizeLayoutMode(value) {
@@ -1086,6 +1173,12 @@
         if (previewToggleButton) {
           previewToggleButton.addEventListener('click', () => {
             setPreviewVisibility(!previewVisible);
+          });
+        }
+
+        if (paperSizeSelect) {
+          paperSizeSelect.addEventListener('change', (event) => {
+            applyPaperSize(event.currentTarget.value);
           });
         }
 
@@ -1261,19 +1354,20 @@
         const duplicateRowButton = document.getElementById('duplicateRow');
 
         function setActiveRowCount(newCount) {
-          const clamped = clamp(newCount, 1, MAX_TAGS);
+          const maxForCurrent = getCurrentMaxTagCount();
+          const clamped = clamp(newCount, 1, maxForCurrent);
           activeRowCount = clamped;
 
           entryRows.forEach((row, index) => {
-            row.hidden = index >= activeRowCount;
+            row.hidden = index >= activeRowCount || index >= maxForCurrent;
           });
 
           if (addRowButton) {
-            addRowButton.disabled = activeRowCount >= MAX_TAGS;
+            addRowButton.disabled = activeRowCount >= maxForCurrent;
           }
 
           if (duplicateRowButton) {
-            duplicateRowButton.disabled = activeRowCount >= MAX_TAGS;
+            duplicateRowButton.disabled = activeRowCount >= maxForCurrent;
           }
 
           updateAllLabels();
@@ -1281,7 +1375,7 @@
 
         if (addRowButton) {
           addRowButton.addEventListener('click', () => {
-            if (activeRowCount < MAX_TAGS) {
+            if (activeRowCount < getCurrentMaxTagCount()) {
               setActiveRowCount(activeRowCount + 1);
               syncInputsFromData();
             }
@@ -1290,7 +1384,7 @@
 
         if (duplicateRowButton) {
           duplicateRowButton.addEventListener('click', () => {
-            if (activeRowCount >= MAX_TAGS) {
+            if (activeRowCount >= getCurrentMaxTagCount()) {
               return;
             }
 
@@ -1316,7 +1410,7 @@
         });
 
         setPreviewVisibility(false);
-        setActiveRowCount(1);
+        applyPaperSize(paperSizeSelect ? paperSizeSelect.value : DEFAULT_PAPER_SIZE);
         syncInputsFromData();
         applyLayoutMode(layoutModeSelect ? layoutModeSelect.value : DEFAULT_LAYOUT_MODE);
 
