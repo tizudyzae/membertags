@@ -31,7 +31,7 @@
         --row-gap: 0cm;
         --tag-width: 10.5cm;
         --layout-offset: 0cm;
-        --tag-width-first: calc(var(--tag-width) - var(--layout-offset));
+        --tag-width-first: var(--tag-width);
         --tag-width-second: var(--tag-width);
         --tag-height: 3.7cm;
         --tag-bg: #00A1CC;
@@ -86,11 +86,13 @@
       body[data-layout-mode='full-bleed'] {
         --layout-offset: 0cm;
         --page-padding-left: 0cm;
+        --tag-width-first: var(--tag-width);
       }
 
       body[data-layout-mode='hp-offset'] {
         --layout-offset: 0.5cm;
         --page-padding-left: var(--layout-offset);
+        --tag-width-first: calc(var(--tag-width) - var(--layout-offset));
       }
 
       @media (max-width: 720px) {
