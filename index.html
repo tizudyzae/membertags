@@ -116,11 +116,11 @@
       }
 
       body[data-layout-mode='hp-offset'][data-paper-size='large'] {
-        --column-template: var(--tag-width);
+        --column-template: var(--tag-width-first) var(--tag-width-second);
       }
 
       body[data-layout-mode='hp-offset'][data-paper-size='normal'] {
-        --column-template: var(--tag-width) var(--tag-width);
+        --column-template: var(--tag-width-first) var(--tag-width-second) var(--tag-width);
       }
 
       @media (max-width: 720px) {
@@ -559,6 +559,11 @@
         overflow: hidden;
       }
 
+      .label.is-placeholder {
+        visibility: hidden;
+        pointer-events: none;
+      }
+
       .label-card {
         background: var(--tag-bg);
         color: var(--tag-text);
@@ -946,13 +951,29 @@
           return currentLayoutMode || DEFAULT_LAYOUT_MODE;
         }
 
-        function getEffectiveColumnCount(config, layoutMode) {
+        function getBaseColumnCount(config) {
           const rawColumns = Number(config?.columns);
-          const baseColumns = Number.isFinite(rawColumns) && rawColumns > 0 ? rawColumns : 1;
-          if (layoutMode === LAYOUT_MODES.HP_OFFSET) {
-            return Math.max(1, baseColumns - 1);
-          }
-          return baseColumns;
+          return Number.isFinite(rawColumns) && rawColumns > 0 ? rawColumns : 1;
+        }
+
+        function getPlaceholderColumnCount(layoutMode) {
+          return layoutMode === LAYOUT_MODES.HP_OFFSET ? 1 : 0;
+        }
+
+        function getEffectiveColumnCount(config, layoutMode) {
+          const baseColumns = getBaseColumnCount(config);
+          const placeholderColumns = getPlaceholderColumnCount(layoutMode);
+          const usableColumns = baseColumns - placeholderColumns;
+          return Math.max(1, usableColumns);
+        }
+
+        function getMaxSlotCountForPaper(sizeKey) {
+          const config = getPaperSizeConfig(sizeKey);
+          const rowsValue = Number(config?.rows);
+          const rows = Number.isFinite(rowsValue) && rowsValue > 0 ? rowsValue : 1;
+          const baseColumns = getBaseColumnCount(config);
+          const total = rows * baseColumns;
+          return Number.isFinite(total) && total > 0 ? total : 1;
         }
 
         function getMaxTagCountForPaper(sizeKey, layoutModeOverride) {
@@ -970,6 +991,42 @@
 
         function getCurrentMaxTagCount() {
           return getMaxTagCountForPaper(currentPaperSize);
+        }
+
+        function getCurrentMaxSlotCount() {
+          return getMaxSlotCountForPaper(currentPaperSize);
+        }
+
+        function getLabelDataIndex(labelIndex, layoutModeOverride) {
+          const config = getPaperSizeConfig(currentPaperSize);
+          const baseColumns = getBaseColumnCount(config);
+
+          if (!Number.isFinite(baseColumns) || baseColumns <= 0) {
+            return labelIndex;
+          }
+
+          const layoutModeToUse =
+            typeof layoutModeOverride === 'string'
+              ? normalizeLayoutMode(layoutModeOverride)
+              : getActiveLayoutMode();
+          const placeholderColumns = getPlaceholderColumnCount(layoutModeToUse);
+
+          if (!placeholderColumns) {
+            return labelIndex;
+          }
+
+          if (placeholderColumns >= baseColumns) {
+            return null;
+          }
+
+          const columnIndex = labelIndex % baseColumns;
+          if (columnIndex < placeholderColumns) {
+            return null;
+          }
+
+          const rowIndex = Math.floor(labelIndex / baseColumns);
+          const usableColumns = baseColumns - placeholderColumns;
+          return rowIndex * usableColumns + (columnIndex - placeholderColumns);
         }
 
         function createLabel(index) {
@@ -1096,15 +1153,36 @@
           if (!refs) return;
 
           const maxForCurrent = getCurrentMaxTagCount();
-          const isWithinPaper = index < maxForCurrent;
-          const isActive = isWithinPaper && index < activeRowCount;
-          refs.label.style.display = isActive ? 'grid' : 'none';
+          const maxSlotCount = getCurrentMaxSlotCount();
+          const dataIndex = getLabelDataIndex(index);
+          const isPlaceholder = dataIndex === null;
+          const isWithinGrid = index < maxSlotCount;
 
-          if (!isActive) {
+          refs.label.classList.toggle('is-placeholder', Boolean(isPlaceholder));
+
+          if (!isWithinGrid) {
+            refs.label.style.display = 'none';
+            refs.label.setAttribute('aria-hidden', 'true');
             return;
           }
 
-          const data = tagData[index];
+          if (isPlaceholder) {
+            refs.label.style.display = 'grid';
+            refs.label.setAttribute('aria-hidden', 'true');
+            return;
+          }
+
+          const isActiveSlot = dataIndex < activeRowCount && dataIndex < maxForCurrent;
+          if (!isActiveSlot) {
+            refs.label.style.display = 'none';
+            refs.label.setAttribute('aria-hidden', 'true');
+            return;
+          }
+
+          refs.label.style.display = 'grid';
+          refs.label.setAttribute('aria-hidden', 'false');
+
+          const data = tagData[dataIndex] || {};
           setText(refs.productNameEl, data.productName, placeholders.productName);
           setText(refs.priceEl, data.price, placeholders.price);
           setText(refs.unitPriceEl, data.unitPrice, placeholders.unitPrice);
