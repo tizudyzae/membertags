@@ -115,6 +115,14 @@
         --tag-width-first: calc(var(--tag-width) - var(--layout-offset));
       }
 
+      body[data-layout-mode='hp-offset'][data-paper-size='large'] {
+        --column-template: var(--tag-width);
+      }
+
+      body[data-layout-mode='hp-offset'][data-paper-size='normal'] {
+        --column-template: var(--tag-width) var(--tag-width);
+      }
+
       @media (max-width: 720px) {
         main {
           padding: 1.5rem;
@@ -934,9 +942,29 @@
           return PAPER_SIZES[normalized] || PAPER_SIZES[DEFAULT_PAPER_SIZE];
         }
 
-        function getMaxTagCountForPaper(sizeKey) {
+        function getActiveLayoutMode() {
+          return currentLayoutMode || DEFAULT_LAYOUT_MODE;
+        }
+
+        function getEffectiveColumnCount(config, layoutMode) {
+          const rawColumns = Number(config?.columns);
+          const baseColumns = Number.isFinite(rawColumns) && rawColumns > 0 ? rawColumns : 1;
+          if (layoutMode === LAYOUT_MODES.HP_OFFSET) {
+            return Math.max(1, baseColumns - 1);
+          }
+          return baseColumns;
+        }
+
+        function getMaxTagCountForPaper(sizeKey, layoutModeOverride) {
           const config = getPaperSizeConfig(sizeKey);
-          const total = Number(config?.rows) * Number(config?.columns);
+          const rowsValue = Number(config?.rows);
+          const rows = Number.isFinite(rowsValue) && rowsValue > 0 ? rowsValue : 1;
+          const layoutModeToUse =
+            typeof layoutModeOverride === 'string'
+              ? normalizeLayoutMode(layoutModeOverride)
+              : getActiveLayoutMode();
+          const columns = getEffectiveColumnCount(config, layoutModeToUse);
+          const total = rows * columns;
           return Number.isFinite(total) && total > 0 ? total : 1;
         }
 
@@ -950,7 +978,7 @@
           label.innerHTML = `
             <div class="label-card" data-has-expiry="false">
               <div class="label-card-body">
-                <div class="tag-heading">Members Price</div>
+                <div class="tag-heading">Member Price</div>
                 <div class="price" data-role="price">${placeholders.price}</div>
                 <div class="unit-line" data-role="unit-line">
                   <span class="unit-price" data-role="unit-price">${placeholders.unitPrice}</span>
@@ -959,7 +987,7 @@
                 </div>
               </div>
               <div class="expiry-pill" data-role="expiry" data-empty="true" aria-hidden="true">
-                <span class="expiry-label">Expires</span>
+                <span class="expiry-label">Ends</span>
                 <span class="expiry-date" data-role="end-date" data-empty="true">${placeholders.endDate}</span>
               </div>
             </div>
@@ -1148,7 +1176,12 @@
 
           if (currentLayoutMode !== normalized) {
             currentLayoutMode = normalized;
-            updateAllLabels();
+            const maxForCurrent = getCurrentMaxTagCount();
+            if (activeRowCount > maxForCurrent) {
+              setActiveRowCount(maxForCurrent);
+            } else {
+              updateAllLabels();
+            }
           }
         }
 
