@@ -61,18 +61,18 @@
         --a4-heading-margin-bottom: 2.42cm;
         --a4-price-font-size: 5.161cm;
         --a4-price-letter-spacing: -0.002em;
-        --a4-price-margin-top: 0cm;
+        --a4-price-margin-top: -0.5cm;
         --a4-unit-font-size: 0.851cm;
         --a4-unit-letter-spacing: 0.01em;
-        --a4-unit-margin-top: 2.32cm;
+        --a4-unit-margin-top: 2.5cm;
         --a4-end-font-size: 0.462cm;
         --a4-end-letter-spacing: 0.01em;
-        --a4-end-margin-top: 0.92cm;
+        --a4-end-margin-top: 0cm;
         --a4-end-date-letter-spacing: 0.02em;
         --a4-product-font-size: 1.168cm;
         --a4-product-letter-spacing: 0.012em;
         --a4-product-margin-top: 2.64cm;
-        --a4-product-translate-x: 0cm;
+        --a4-product-translate-x: -1.9cm;
       }
 
       *,
@@ -411,7 +411,7 @@
 
       .a4-tuning-field-label {
         font-size: 0.9rem;
-        font-weight: 500;
+        font-weight: 400;
         color: #111827;
       }
 
@@ -439,7 +439,7 @@
       .a4-tuning-unit {
         font-size: 0.85rem;
         color: #6b7280;
-        font-weight: 500;
+        font-weight: 400;
       }
 
       .a4-tuning-actions {
@@ -916,7 +916,7 @@
         font-size: var(--a4-product-font-size);
         letter-spacing: var(--a4-product-letter-spacing);
         color: #000000;
-        font-weight: 500;
+        font-weight: 400;
         margin: 0;
         text-align: center;
         line-height: 1.15;
@@ -2094,7 +2094,16 @@
           const matchingColor =
             TAG_COLOR_OPTIONS.find((option) => option.value.toLowerCase() === selectedColor)?.value ||
             DEFAULT_TAG_COLOR;
+
           refs.label.style.setProperty('--tag-bg', matchingColor);
+          if (refs.cardEl) {
+            refs.cardEl.style.setProperty('--tag-bg', matchingColor);
+            if (document.body?.dataset?.paperSize === 'a4-single') {
+              refs.cardEl.style.removeProperty('background-color');
+            } else {
+              refs.cardEl.style.backgroundColor = matchingColor;
+            }
+          }
 
           applyPriceScaling(refs.priceEl);
         }
