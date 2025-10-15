@@ -619,6 +619,11 @@
         display: none !important;
       }
 
+      .entries-table td[hidden],
+      .entries-table th[hidden] {
+        display: none !important;
+      }
+
       .entry-index {
         display: inline-flex;
         align-items: center;
@@ -640,6 +645,10 @@
         gap: 0.45rem;
       }
 
+      .entry-field.entry-field-checkbox {
+        align-items: flex-start;
+      }
+
       .entry-field-label {
         display: none;
         font-size: 0.7rem;
@@ -659,6 +668,26 @@
         font-family: inherit;
         font-size: 0.9rem;
         transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .entry-checkbox-control {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        font-size: 0.85rem;
+        color: #111827;
+        font-weight: 600;
+      }
+
+      .entry-input-checkbox {
+        width: 1.15rem;
+        height: 1.15rem;
+        margin: 0;
+        flex: none;
+      }
+
+      .entry-checkbox-text {
+        font-weight: 600;
       }
 
       .entries-table input[type='text']:focus,
@@ -752,6 +781,21 @@
         border-radius: inherit;
         pointer-events: none;
         border: 1px solid rgba(15, 23, 42, 0.08);
+      }
+
+      .drink-aware-badge {
+        position: absolute;
+        left: 1.2cm;
+        bottom: 1.2cm;
+        width: 2.4cm;
+        max-width: 22%;
+        height: auto;
+        object-fit: contain;
+        pointer-events: none;
+      }
+
+      .drink-aware-badge[hidden] {
+        display: none !important;
       }
 
       .label-grid {
@@ -1156,7 +1200,8 @@
                 <th>Unit price</th>
                 <th>Unit</th>
                 <th>End date</th>
-                <th>Card colour</th>
+                <th class="colour-column" data-column="tagColor">Card colour</th>
+                <th class="drink-aware-column" data-column="drinkAware" hidden>Drinkaware</th>
               </tr>
             </thead>
             <tbody id="entriesBody"></tbody>
@@ -1237,6 +1282,15 @@
       <section class="preview-wrapper" id="previewWrapper" aria-label="Tag preview" aria-hidden="true">
         <div class="preview-page" id="tagSheet">
           <div class="label-grid" id="labelGrid"></div>
+          <img
+            src="DrinkAware.png"
+            alt="Drinkaware logo"
+            class="drink-aware-badge"
+            id="drinkAwareBadge"
+            hidden
+            aria-hidden="true"
+            draggable="false"
+          />
         </div>
       </section>
     </main>
@@ -1314,12 +1368,19 @@
           unit: '',
           endDate: '',
           tagColor: DEFAULT_TAG_COLOR,
+          drinkAware: false,
         }));
 
         let activeRowCount = 0;
 
         const labelGrid = document.getElementById('labelGrid');
         const labelRefs = [];
+        const colourCells = [];
+        const drinkAwareCells = [];
+        const drinkAwareInputs = [];
+        const drinkAwareBadge = document.getElementById('drinkAwareBadge');
+        const colourHeader = document.querySelector('th[data-column="tagColor"]');
+        const drinkAwareHeader = document.querySelector('th[data-column="drinkAware"]');
         const paperSizeSelect = document.getElementById('paperSize');
         const layoutModeSelect = document.getElementById('layoutMode');
         const previewWrapper = document.getElementById('previewWrapper');
@@ -2034,6 +2095,11 @@
           const refs = labelRefs[index];
           if (!refs) return;
 
+          const labelEl = refs.label;
+          if (labelEl) {
+            labelEl.dataset.drinkAware = 'false';
+          }
+
           const maxForCurrent = getCurrentMaxTagCount();
           const maxSlotCount = getCurrentMaxSlotCount();
           const dataIndex = getLabelDataIndex(index);
@@ -2105,6 +2171,10 @@
             }
           }
 
+          if (labelEl) {
+            labelEl.dataset.drinkAware = data.drinkAware ? 'true' : 'false';
+          }
+
           applyPriceScaling(refs.priceEl);
         }
 
@@ -2112,6 +2182,7 @@
           for (let i = 0; i < TOTAL_LABEL_SLOTS; i += 1) {
             updateLabel(i);
           }
+          syncDrinkAwareBadge();
         }
 
         function applyPaperSize(nextSize) {
@@ -2136,6 +2207,7 @@
           }
 
           syncA4TuningAvailability();
+          syncEntryTableColumnVisibility();
 
           const maxForCurrent = getCurrentMaxTagCount();
           const desiredCount = activeRowCount > 0 ? activeRowCount : 1;
@@ -2175,6 +2247,58 @@
               updateAllLabels();
             }
           }
+        }
+
+        function syncEntryTableColumnVisibility() {
+          const isA4 = document.body?.dataset?.paperSize === 'a4-single';
+
+          if (colourHeader) {
+            colourHeader.hidden = isA4;
+          }
+
+          if (drinkAwareHeader) {
+            drinkAwareHeader.hidden = !isA4;
+          }
+
+          colourCells.forEach((cell) => {
+            if (cell) {
+              cell.hidden = isA4;
+            }
+          });
+
+          drinkAwareCells.forEach((cell) => {
+            if (cell) {
+              cell.hidden = !isA4;
+            }
+          });
+
+          drinkAwareInputs.forEach((input) => {
+            if (input) {
+              input.disabled = !isA4;
+            }
+          });
+        }
+
+        function hasActiveDrinkAwareSelection() {
+          const maxForCurrent = getCurrentMaxTagCount();
+          const activeCount = Math.min(activeRowCount, maxForCurrent);
+          for (let i = 0; i < activeCount; i += 1) {
+            if (tagData[i]?.drinkAware) {
+              return true;
+            }
+          }
+          return false;
+        }
+
+        function syncDrinkAwareBadge() {
+          if (!drinkAwareBadge) {
+            return;
+          }
+
+          const shouldShow =
+            document.body?.dataset?.paperSize === 'a4-single' && hasActiveDrinkAwareSelection();
+          drinkAwareBadge.hidden = !shouldShow;
+          drinkAwareBadge.setAttribute('aria-hidden', shouldShow ? 'false' : 'true');
         }
 
         function setPreviewVisibility(visible) {
@@ -2327,6 +2451,8 @@
           });
 
           const colourCell = document.createElement('td');
+          colourCell.dataset.column = 'tagColor';
+          colourCell.classList.add('colour-cell');
           const colourWrapper = document.createElement('label');
           colourWrapper.className = 'entry-field';
           colourWrapper.dataset.field = 'tagColor';
@@ -2355,6 +2481,47 @@
           colourCell.appendChild(colourWrapper);
           row.appendChild(colourCell);
 
+          const drinkAwareCell = document.createElement('td');
+          drinkAwareCell.dataset.column = 'drinkAware';
+          drinkAwareCell.classList.add('drink-aware-cell');
+          const drinkAwareWrapper = document.createElement('div');
+          drinkAwareWrapper.className = 'entry-field entry-field-checkbox';
+          drinkAwareWrapper.dataset.field = 'drinkAware';
+
+          const drinkAwareLabel = document.createElement('span');
+          drinkAwareLabel.className = 'entry-field-label';
+          drinkAwareLabel.textContent = 'Drinkaware';
+          drinkAwareWrapper.appendChild(drinkAwareLabel);
+
+          const drinkAwareControl = document.createElement('label');
+          drinkAwareControl.className = 'entry-checkbox-control';
+          drinkAwareControl.htmlFor = `entry-drinkAware-${index}`;
+
+          const drinkAwareInput = document.createElement('input');
+          drinkAwareInput.type = 'checkbox';
+          drinkAwareInput.className = 'entry-input entry-input-checkbox';
+          drinkAwareInput.dataset.index = index;
+          drinkAwareInput.dataset.field = 'drinkAware';
+          drinkAwareInput.id = `entry-drinkAware-${index}`;
+          drinkAwareInput.name = `entry-drinkAware-${index}`;
+          drinkAwareInput.autocomplete = 'off';
+          drinkAwareInput.disabled = true;
+
+          const drinkAwareText = document.createElement('span');
+          drinkAwareText.className = 'entry-checkbox-text';
+          drinkAwareText.textContent = 'Include Drinkaware logo';
+
+          drinkAwareControl.appendChild(drinkAwareInput);
+          drinkAwareControl.appendChild(drinkAwareText);
+          drinkAwareWrapper.appendChild(drinkAwareControl);
+          drinkAwareCell.appendChild(drinkAwareWrapper);
+          drinkAwareCell.hidden = true;
+          row.appendChild(drinkAwareCell);
+
+          colourCells.push(colourCell);
+          drinkAwareCells.push(drinkAwareCell);
+          drinkAwareInputs.push(drinkAwareInput);
+
           row.hidden = true;
           entriesBody.appendChild(row);
           entryRows.push(row);
@@ -2366,16 +2533,26 @@
           entryInputs.forEach((input) => {
             const index = Number(input.dataset.index);
             const field = input.dataset.field;
+            const record = tagData[index];
+            if (!record) {
+              return;
+            }
+
             if (field === 'tagColor') {
-              const storedValue = tagData[index][field] || DEFAULT_TAG_COLOR;
+              const storedValue = record[field] || DEFAULT_TAG_COLOR;
               input.value = storedValue;
-              if (!tagData[index][field]) {
-                tagData[index][field] = storedValue;
+              if (!record[field]) {
+                record[field] = storedValue;
               }
+            } else if (field === 'drinkAware') {
+              const storedValue = Boolean(record[field]);
+              input.checked = storedValue;
+              record[field] = storedValue;
             } else {
-              input.value = tagData[index][field] || '';
+              input.value = record[field] || '';
             }
           });
+          syncDrinkAwareBadge();
         }
 
         entryInputs.forEach((input) => {
@@ -2383,7 +2560,23 @@
             const target = event.currentTarget;
             const index = Number(target.dataset.index);
             const field = target.dataset.field;
-            tagData[index][field] = target.value;
+            const record = tagData[index];
+            if (!record || !field) {
+              return;
+            }
+
+            if (field === 'drinkAware') {
+              record[field] = target.checked;
+              updateLabel(index);
+              syncDrinkAwareBadge();
+              return;
+            }
+
+            if (field === 'tagColor') {
+              record[field] = target.value || DEFAULT_TAG_COLOR;
+            } else {
+              record[field] = target.value;
+            }
             updateLabel(index);
           };
           input.addEventListener('input', handleInput);
@@ -2444,6 +2637,7 @@
             item.unit = '';
             item.endDate = '';
             item.tagColor = DEFAULT_TAG_COLOR;
+            item.drinkAware = false;
           });
           syncInputsFromData();
           setActiveRowCount(1);
