@@ -56,6 +56,22 @@
         --unit-height-scale: 1;
         --expiry-height-scale: 1;
         --product-name-scale: 1;
+        --a4-heading-font-size: 3.175cm;
+        --a4-heading-letter-spacing: 0em;
+        --a4-heading-margin-bottom: 2.42cm;
+        --a4-price-font-size: 6.1736cm;
+        --a4-price-letter-spacing: -0.045em;
+        --a4-price-margin-top: 0cm;
+        --a4-unit-font-size: 0.651cm;
+        --a4-unit-letter-spacing: 0.01em;
+        --a4-unit-margin-top: 1.32cm;
+        --a4-end-font-size: 0.382cm;
+        --a4-end-letter-spacing: 0.01em;
+        --a4-end-margin-top: 0.92cm;
+        --a4-end-date-letter-spacing: 0.02em;
+        --a4-product-font-size: 1.168cm;
+        --a4-product-letter-spacing: 0.012em;
+        --a4-product-margin-top: 2.64cm;
       }
 
       *,
@@ -134,7 +150,7 @@
         --unit-height-scale: 1;
         --expiry-height-scale: 1;
         --product-name-scale: 1.1;
-        --tag-heading-size: 3.175cm;
+        --tag-heading-size: var(--a4-heading-font-size);
       }
 
       body[data-layout-mode='full-bleed']:not([data-paper-size='a4-single']) {
@@ -260,6 +276,20 @@
           padding: 0.65rem 0.75rem;
           font-size: 1rem;
         }
+
+        .a4-tuning-panel {
+          padding: 1rem;
+        }
+
+        .a4-tuning-input-wrapper {
+          flex-direction: column;
+          align-items: stretch;
+          gap: 0.35rem;
+        }
+
+        .a4-tuning-unit {
+          align-self: flex-end;
+        }
       }
 
       .controls {
@@ -293,6 +323,159 @@
         align-items: center;
         gap: 1rem;
         flex-wrap: wrap;
+      }
+
+      .a4-tuning-toggle {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid #e5e7eb;
+      }
+
+      .toggle-control {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 600;
+        color: #111827;
+        cursor: pointer;
+        user-select: none;
+      }
+
+      .toggle-control input[type='checkbox'] {
+        width: 1.1rem;
+        height: 1.1rem;
+        border-radius: 0.35rem;
+        border: 1px solid #d1d5db;
+        cursor: pointer;
+      }
+
+      .toggle-control input[type='checkbox']:disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
+
+      .a4-tuning-note {
+        margin: 0;
+        color: #4b5563;
+      }
+
+      .a4-tuning-panel {
+        margin-top: 1.25rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+        padding: 1.25rem;
+        border: 1px solid #e5e7eb;
+        border-radius: 14px;
+        background: #f9fafb;
+      }
+
+      .a4-tuning-panel[hidden] {
+        display: none !important;
+      }
+
+      .a4-tuning-panel.is-disabled {
+        opacity: 0.6;
+      }
+
+      .a4-tuning-groups {
+        display: grid;
+        gap: 1.1rem;
+      }
+
+      .a4-tuning-group {
+        border: none;
+        padding: 0;
+        margin: 0;
+        display: grid;
+        gap: 0.85rem;
+      }
+
+      .a4-tuning-group legend {
+        font-size: 0.85rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #6b7280;
+        font-weight: 600;
+        padding: 0;
+      }
+
+      .a4-tuning-field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.45rem;
+      }
+
+      .a4-tuning-field-label {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: #111827;
+      }
+
+      .a4-tuning-input-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+      }
+
+      .a4-tuning-input {
+        flex: 1;
+        min-width: 0;
+        padding: 0.55rem 0.6rem;
+        border-radius: 10px;
+        border: 1px solid #d1d5db;
+        font-size: 0.95rem;
+        font-family: inherit;
+      }
+
+      .a4-tuning-input:disabled {
+        background: #f3f4f6;
+        cursor: not-allowed;
+      }
+
+      .a4-tuning-unit {
+        font-size: 0.85rem;
+        color: #6b7280;
+        font-weight: 500;
+      }
+
+      .a4-tuning-actions {
+        display: flex;
+        justify-content: flex-end;
+      }
+
+      .a4-export-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .a4-export-label {
+        font-size: 0.85rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #6b7280;
+        font-weight: 600;
+      }
+
+      .a4-export-snippet {
+        width: 100%;
+        min-height: 8rem;
+        padding: 0.75rem;
+        border-radius: 12px;
+        border: 1px solid #d1d5db;
+        font-family: 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', monospace;
+        font-size: 0.85rem;
+        background: #ffffff;
+        resize: vertical;
+      }
+
+      .a4-export-snippet:focus {
+        outline: none;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
       }
 
       .layout-mode-control {
@@ -636,35 +819,36 @@
       body[data-paper-size='a4-single'] .tag-heading {
         font-family: var(--heading-font);
         font-size: var(--tag-heading-size);
-        letter-spacing: 0em;
+        letter-spacing: var(--a4-heading-letter-spacing);
         text-transform: none;
         font-weight: 800;
         line-height: 1.02;
         margin: 0;
-        margin-bottom: 2.42cm;
+        margin-bottom: var(--a4-heading-margin-bottom);
         color: #000000;
       }
 
       body[data-paper-size='a4-single'] .price {
         font-family: 'CoopHeadline', 'Barlow Condensed', 'Impact', sans-serif;
-        font-size: 6.1736cm;
+        font-size: var(--a4-price-font-size);
         line-height: 0.98;
-        letter-spacing: -0.045em;
+        letter-spacing: var(--a4-price-letter-spacing);
         font-weight: 800;
         margin: 0;
+        margin-top: var(--a4-price-margin-top);
         color: #000000;
       }
 
       body[data-paper-size='a4-single'] .unit-line {
         font-family: var(--body-font);
-        font-size: 0.651cm;
+        font-size: var(--a4-unit-font-size);
         font-style: normal;
         color: #6b7280;
         gap: 0.2cm;
         flex-wrap: wrap;
         justify-content: center;
-        letter-spacing: 0.01em;
-        margin-top: 1.32cm;
+        letter-spacing: var(--a4-unit-letter-spacing);
+        margin-top: var(--a4-unit-margin-top);
         margin-bottom: 0;
       }
 
@@ -689,13 +873,13 @@
       }
 
       body[data-paper-size='a4-single'] .expiry-pill {
-        margin-top: 0.92cm;
+        margin-top: var(--a4-end-margin-top);
         background: transparent;
         color: #6b7280;
         border-radius: 0;
         padding: 0;
-        font-size: 0.382cm;
-        letter-spacing: 0.01em;
+        font-size: var(--a4-end-font-size);
+        letter-spacing: var(--a4-end-letter-spacing);
         font-style: normal;
         gap: 0.08cm;
         flex-wrap: wrap;
@@ -711,7 +895,7 @@
 
       body[data-paper-size='a4-single'] .expiry-date {
         font-size: inherit;
-        letter-spacing: 0.02em;
+        letter-spacing: var(--a4-end-date-letter-spacing);
         font-weight: 400;
       }
 
@@ -722,13 +906,13 @@
         display: flex;
         align-items: flex-start;
         justify-content: center;
-        margin-top: 2.64cm;
+        margin-top: var(--a4-product-margin-top);
       }
 
       body[data-paper-size='a4-single'] .product-name {
         font-family: var(--body-font);
-        font-size: 1.168cm;
-        letter-spacing: 0.012em;
+        font-size: var(--a4-product-font-size);
+        letter-spacing: var(--a4-product-letter-spacing);
         color: #374151;
         font-weight: 500;
         margin: 0;
@@ -1026,6 +1210,26 @@
             <button type="button" class="primary" id="downloadPdf">Download PDF</button>
           </div>
         </div>
+        <div class="a4-tuning-toggle">
+          <label class="toggle-control" for="a4TuningToggle">
+            <input type="checkbox" id="a4TuningToggle" name="a4TuningToggle" />
+            <span>Enable A4 Single fine-tuning controls</span>
+          </label>
+          <p class="control-note a4-tuning-note">
+            Adjust typography for the Member Price A4 layout. The controls are available when the A4 Single paper size is
+            selected.
+          </p>
+        </div>
+        <div class="a4-tuning-panel" id="a4TuningPanel" hidden aria-hidden="true">
+          <div class="a4-tuning-groups" id="a4TuningForm"></div>
+          <div class="a4-tuning-actions">
+            <button type="button" class="secondary" id="a4ResetButton">Reset to defaults</button>
+          </div>
+          <div class="a4-export-wrapper">
+            <label class="a4-export-label" for="a4ExportSnippet">Export snippet</label>
+            <textarea id="a4ExportSnippet" class="a4-export-snippet" rows="6" readonly></textarea>
+          </div>
+        </div>
       </section>
       <section class="preview-wrapper" id="previewWrapper" aria-label="Tag preview" aria-hidden="true">
         <div class="preview-page" id="tagSheet">
@@ -1120,6 +1324,11 @@
         const hpOffsetOption = layoutModeSelect
           ? layoutModeSelect.querySelector('option[value="hp-offset"]')
           : null;
+        const a4TuningToggle = document.getElementById('a4TuningToggle');
+        const a4TuningPanel = document.getElementById('a4TuningPanel');
+        const a4TuningForm = document.getElementById('a4TuningForm');
+        const a4ExportSnippet = document.getElementById('a4ExportSnippet');
+        const a4ResetButton = document.getElementById('a4ResetButton');
         let previewVisible = false;
         let currentLayoutMode = null;
         let currentPaperSize = DEFAULT_PAPER_SIZE;
@@ -1129,6 +1338,438 @@
         const PRICE_TRIPLE_DIGIT_THRESHOLD = 99.99;
         const PRICE_DOUBLE_DIGIT_SCALE = 0.8;
         const PRICE_TRIPLE_DIGIT_SCALE = 0.67;
+
+        function normalizeA4FieldValue(field, rawValue) {
+          if (!field) {
+            return null;
+          }
+
+          if (rawValue === null || rawValue === undefined || rawValue === '') {
+            if (field.default !== undefined) {
+              return normalizeA4FieldValue(field, field.default);
+            }
+            return null;
+          }
+
+          const numeric = Number.parseFloat(rawValue);
+          if (!Number.isFinite(numeric)) {
+            if (field.default !== undefined) {
+              return normalizeA4FieldValue(field, field.default);
+            }
+            return null;
+          }
+
+          let clamped = numeric;
+          if (typeof field.min === 'number' && clamped < field.min) {
+            clamped = field.min;
+          }
+          if (typeof field.max === 'number' && clamped > field.max) {
+            clamped = field.max;
+          }
+
+          const decimals = typeof field.decimals === 'number' ? field.decimals : 3;
+          const displayValue = Number(clamped.toFixed(decimals)).toString();
+          return {
+            displayValue,
+            cssValue: `${displayValue}${field.unit}`,
+          };
+        }
+
+        function applyA4Value(field, rawValue, updateInput = true) {
+          const normalized = normalizeA4FieldValue(field, rawValue);
+          if (!normalized) {
+            return null;
+          }
+
+          a4TuningState[field.varName] = normalized.cssValue;
+
+          if (document.body) {
+            document.body.style.setProperty(field.varName, normalized.cssValue);
+          }
+
+          if (updateInput) {
+            const input = a4TuningInputs.get(field.varName);
+            if (input && input.value !== normalized.displayValue) {
+              input.value = normalized.displayValue;
+            }
+          }
+
+          return normalized.cssValue;
+        }
+
+        function updateA4ExportSnippet() {
+          if (!a4ExportSnippet) {
+            return;
+          }
+
+          const entries = Object.entries(a4TuningState)
+            .filter(([, value]) => typeof value === 'string' && value)
+            .sort(([a], [b]) => a.localeCompare(b));
+
+          if (!entries.length) {
+            a4ExportSnippet.value = A4_TUNING_INACTIVE_MESSAGE;
+            return;
+          }
+
+          const snippetObject = entries.reduce((acc, [key, value]) => {
+            acc[key] = value;
+            return acc;
+          }, {});
+          a4ExportSnippet.value = JSON.stringify(snippetObject, null, 2);
+        }
+
+        function handleA4Input(field, rawValue) {
+          const cssValue = applyA4Value(field, rawValue);
+          if (!cssValue) {
+            return;
+          }
+
+          updateA4ExportSnippet();
+
+          if (document.body?.dataset?.paperSize === 'a4-single') {
+            updateAllLabels();
+          }
+        }
+
+        function resetA4TuningToDefaults() {
+          A4_TUNING_FIELDS.forEach((field) => {
+            applyA4Value(field, field.default);
+          });
+
+          updateA4ExportSnippet();
+
+          if (document.body?.dataset?.paperSize === 'a4-single') {
+            updateAllLabels();
+          }
+        }
+
+        function syncA4InputsDisabledState(disabled) {
+          a4TuningInputs.forEach((input) => {
+            input.disabled = disabled;
+          });
+
+          if (a4ResetButton) {
+            a4ResetButton.disabled = disabled;
+          }
+        }
+
+        function syncA4TuningAvailability() {
+          const isA4 = currentPaperSize === 'a4-single';
+
+          if (a4TuningToggle) {
+            a4TuningToggle.disabled = !isA4;
+            a4TuningToggle.setAttribute('aria-disabled', !isA4 ? 'true' : 'false');
+            if (!isA4 && a4TuningToggle.checked) {
+              a4TuningToggle.checked = false;
+            }
+          }
+
+          const isActive = isA4 && Boolean(a4TuningToggle && a4TuningToggle.checked);
+
+          if (a4TuningPanel) {
+            a4TuningPanel.hidden = !isActive;
+            a4TuningPanel.setAttribute('aria-hidden', isActive ? 'false' : 'true');
+            a4TuningPanel.classList.toggle('is-disabled', !isA4);
+          }
+
+          syncA4InputsDisabledState(!isActive);
+
+          if (a4ExportSnippet) {
+            if (isActive) {
+              updateA4ExportSnippet();
+            } else {
+              a4ExportSnippet.value = A4_TUNING_INACTIVE_MESSAGE;
+            }
+          }
+        }
+
+        function buildA4TuningControls() {
+          if (!a4TuningForm) {
+            if (a4ExportSnippet) {
+              a4ExportSnippet.value = A4_TUNING_INACTIVE_MESSAGE;
+            }
+            return;
+          }
+
+          const groups = new Map();
+
+          A4_TUNING_FIELDS.forEach((field) => {
+            let fieldset = groups.get(field.group);
+            if (!fieldset) {
+              fieldset = document.createElement('fieldset');
+              fieldset.className = 'a4-tuning-group';
+              const legend = document.createElement('legend');
+              legend.textContent = field.group;
+              fieldset.appendChild(legend);
+              a4TuningForm.appendChild(fieldset);
+              groups.set(field.group, fieldset);
+            }
+
+            const wrapper = document.createElement('label');
+            wrapper.className = 'a4-tuning-field';
+            wrapper.htmlFor = field.id;
+
+            const labelEl = document.createElement('span');
+            labelEl.className = 'a4-tuning-field-label';
+            labelEl.textContent = field.label;
+            wrapper.appendChild(labelEl);
+
+            const inputWrapper = document.createElement('div');
+            inputWrapper.className = 'a4-tuning-input-wrapper';
+
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.className = 'a4-tuning-input';
+            input.id = field.id;
+            input.name = field.id;
+            input.inputMode = 'decimal';
+
+            if (typeof field.step === 'number') {
+              input.step = field.step.toString();
+            }
+            if (typeof field.min === 'number') {
+              input.min = field.min.toString();
+            }
+            if (typeof field.max === 'number') {
+              input.max = field.max.toString();
+            }
+
+            const normalizedDefault = normalizeA4FieldValue(field, field.default);
+            if (normalizedDefault) {
+              input.value = normalizedDefault.displayValue;
+              a4TuningState[field.varName] = normalizedDefault.cssValue;
+              if (document.body) {
+                document.body.style.setProperty(field.varName, normalizedDefault.cssValue);
+              }
+            }
+
+            inputWrapper.appendChild(input);
+
+            const unitEl = document.createElement('span');
+            unitEl.className = 'a4-tuning-unit';
+            unitEl.textContent = field.unit;
+            inputWrapper.appendChild(unitEl);
+
+            wrapper.appendChild(inputWrapper);
+            fieldset.appendChild(wrapper);
+
+            a4TuningInputs.set(field.varName, input);
+
+            const handleChange = (event) => {
+              handleA4Input(field, event.currentTarget.value);
+            };
+
+            input.addEventListener('input', handleChange);
+            input.addEventListener('change', handleChange);
+          });
+
+          updateA4ExportSnippet();
+        }
+
+        buildA4TuningControls();
+        syncA4TuningAvailability();
+
+
+        const A4_TUNING_INACTIVE_MESSAGE =
+          'Enable fine-tuning while "A4 Single" is selected to generate an export snippet.';
+
+        const A4_TUNING_FIELDS = [
+          {
+            id: 'a4HeadingFontSize',
+            group: 'Member price header',
+            label: 'Font size (cm)',
+            varName: '--a4-heading-font-size',
+            unit: 'cm',
+            default: 3.175,
+            min: 0,
+            max: 15,
+            step: 0.001,
+            decimals: 3,
+          },
+          {
+            id: 'a4HeadingLetterSpacing',
+            group: 'Member price header',
+            label: 'Letter spacing (em)',
+            varName: '--a4-heading-letter-spacing',
+            unit: 'em',
+            default: 0,
+            min: -1,
+            max: 1,
+            step: 0.001,
+            decimals: 3,
+          },
+          {
+            id: 'a4HeadingMarginBottom',
+            group: 'Member price header',
+            label: 'Spacing below (cm)',
+            varName: '--a4-heading-margin-bottom',
+            unit: 'cm',
+            default: 2.42,
+            min: -5,
+            max: 15,
+            step: 0.01,
+            decimals: 3,
+          },
+          {
+            id: 'a4PriceFontSize',
+            group: 'Price',
+            label: 'Font size (cm)',
+            varName: '--a4-price-font-size',
+            unit: 'cm',
+            default: 6.1736,
+            min: 0,
+            max: 25,
+            step: 0.0005,
+            decimals: 4,
+          },
+          {
+            id: 'a4PriceLetterSpacing',
+            group: 'Price',
+            label: 'Letter spacing (em)',
+            varName: '--a4-price-letter-spacing',
+            unit: 'em',
+            default: -0.045,
+            min: -0.5,
+            max: 0.5,
+            step: 0.001,
+            decimals: 3,
+          },
+          {
+            id: 'a4PriceMarginTop',
+            group: 'Price',
+            label: 'Margin top (cm)',
+            varName: '--a4-price-margin-top',
+            unit: 'cm',
+            default: 0,
+            min: -5,
+            max: 10,
+            step: 0.01,
+            decimals: 3,
+          },
+          {
+            id: 'a4UnitFontSize',
+            group: 'Equivalent price',
+            label: 'Font size (cm)',
+            varName: '--a4-unit-font-size',
+            unit: 'cm',
+            default: 0.651,
+            min: 0,
+            max: 5,
+            step: 0.001,
+            decimals: 3,
+          },
+          {
+            id: 'a4UnitLetterSpacing',
+            group: 'Equivalent price',
+            label: 'Letter spacing (em)',
+            varName: '--a4-unit-letter-spacing',
+            unit: 'em',
+            default: 0.01,
+            min: -0.5,
+            max: 0.5,
+            step: 0.001,
+            decimals: 3,
+          },
+          {
+            id: 'a4UnitMarginTop',
+            group: 'Equivalent price',
+            label: 'Margin top (cm)',
+            varName: '--a4-unit-margin-top',
+            unit: 'cm',
+            default: 1.32,
+            min: -5,
+            max: 15,
+            step: 0.01,
+            decimals: 3,
+          },
+          {
+            id: 'a4EndFontSize',
+            group: 'End date',
+            label: 'Font size (cm)',
+            varName: '--a4-end-font-size',
+            unit: 'cm',
+            default: 0.382,
+            min: 0,
+            max: 3,
+            step: 0.001,
+            decimals: 3,
+          },
+          {
+            id: 'a4EndLetterSpacing',
+            group: 'End date',
+            label: 'Letter spacing (em)',
+            varName: '--a4-end-letter-spacing',
+            unit: 'em',
+            default: 0.01,
+            min: -0.5,
+            max: 0.5,
+            step: 0.001,
+            decimals: 3,
+          },
+          {
+            id: 'a4EndMarginTop',
+            group: 'End date',
+            label: 'Margin top (cm)',
+            varName: '--a4-end-margin-top',
+            unit: 'cm',
+            default: 0.92,
+            min: -5,
+            max: 15,
+            step: 0.01,
+            decimals: 3,
+          },
+          {
+            id: 'a4EndDateLetterSpacing',
+            group: 'End date',
+            label: 'Date letter spacing (em)',
+            varName: '--a4-end-date-letter-spacing',
+            unit: 'em',
+            default: 0.02,
+            min: -0.5,
+            max: 0.5,
+            step: 0.001,
+            decimals: 3,
+          },
+          {
+            id: 'a4ProductFontSize',
+            group: 'Product description',
+            label: 'Font size (cm)',
+            varName: '--a4-product-font-size',
+            unit: 'cm',
+            default: 1.168,
+            min: 0,
+            max: 5,
+            step: 0.001,
+            decimals: 3,
+          },
+          {
+            id: 'a4ProductLetterSpacing',
+            group: 'Product description',
+            label: 'Letter spacing (em)',
+            varName: '--a4-product-letter-spacing',
+            unit: 'em',
+            default: 0.012,
+            min: -0.5,
+            max: 0.5,
+            step: 0.001,
+            decimals: 3,
+          },
+          {
+            id: 'a4ProductMarginTop',
+            group: 'Product description',
+            label: 'Margin top (cm)',
+            varName: '--a4-product-margin-top',
+            unit: 'cm',
+            default: 2.64,
+            min: -5,
+            max: 20,
+            step: 0.01,
+            decimals: 3,
+          },
+        ];
+
+        const a4TuningInputs = new Map();
+        const a4TuningState = {};
 
         function normalizePaperSize(value) {
           if (typeof value !== 'string') {
@@ -1470,6 +2111,8 @@
             paperSizeSelect.value = normalized;
           }
 
+          syncA4TuningAvailability();
+
           const maxForCurrent = getCurrentMaxTagCount();
           const desiredCount = activeRowCount > 0 ? activeRowCount : 1;
           setActiveRowCount(Math.min(desiredCount, maxForCurrent));
@@ -1526,6 +2169,21 @@
           if (visible) {
             updateAllLabels();
           }
+        }
+
+        if (a4ResetButton) {
+          a4ResetButton.addEventListener('click', () => {
+            resetA4TuningToDefaults();
+          });
+        }
+
+        if (a4TuningToggle) {
+          a4TuningToggle.addEventListener('change', () => {
+            syncA4TuningAvailability();
+            if (document.body?.dataset?.paperSize === 'a4-single') {
+              updateAllLabels();
+            }
+          });
         }
 
         if (previewToggleButton) {
