@@ -59,19 +59,20 @@
         --a4-heading-font-size: 3.175cm;
         --a4-heading-letter-spacing: 0em;
         --a4-heading-margin-bottom: 2.42cm;
-        --a4-price-font-size: 6.1736cm;
-        --a4-price-letter-spacing: -0.045em;
+        --a4-price-font-size: 5.161cm;
+        --a4-price-letter-spacing: -0.002em;
         --a4-price-margin-top: 0cm;
-        --a4-unit-font-size: 0.651cm;
+        --a4-unit-font-size: 0.851cm;
         --a4-unit-letter-spacing: 0.01em;
-        --a4-unit-margin-top: 1.32cm;
-        --a4-end-font-size: 0.382cm;
+        --a4-unit-margin-top: 2.32cm;
+        --a4-end-font-size: 0.462cm;
         --a4-end-letter-spacing: 0.01em;
         --a4-end-margin-top: 0.92cm;
         --a4-end-date-letter-spacing: 0.02em;
         --a4-product-font-size: 1.168cm;
         --a4-product-letter-spacing: 0.012em;
         --a4-product-margin-top: 2.64cm;
+        --a4-product-translate-x: 0cm;
       }
 
       *,
@@ -797,6 +798,7 @@
         box-shadow: none;
         overflow: visible;
         gap: 0;
+        color: #000000;
       }
 
       body[data-paper-size='a4-single'] .label-card {
@@ -843,7 +845,7 @@
         font-family: var(--body-font);
         font-size: var(--a4-unit-font-size);
         font-style: normal;
-        color: #6b7280;
+        color: #000000;
         gap: 0.2cm;
         flex-wrap: wrap;
         justify-content: center;
@@ -875,7 +877,7 @@
       body[data-paper-size='a4-single'] .expiry-pill {
         margin-top: var(--a4-end-margin-top);
         background: transparent;
-        color: #6b7280;
+        color: #000000;
         border-radius: 0;
         padding: 0;
         font-size: var(--a4-end-font-size);
@@ -913,11 +915,12 @@
         font-family: var(--body-font);
         font-size: var(--a4-product-font-size);
         letter-spacing: var(--a4-product-letter-spacing);
-        color: #374151;
+        color: #000000;
         font-weight: 500;
         margin: 0;
         text-align: center;
         line-height: 1.15;
+        transform: translateX(var(--a4-product-translate-x));
       }
 
       .label.is-placeholder {
@@ -1377,7 +1380,7 @@
             label: 'Font size (cm)',
             varName: '--a4-price-font-size',
             unit: 'cm',
-            default: 6.1736,
+            default: 5.161,
             min: 0,
             max: 25,
             step: 0.0005,
@@ -1389,7 +1392,7 @@
             label: 'Letter spacing (em)',
             varName: '--a4-price-letter-spacing',
             unit: 'em',
-            default: -0.045,
+            default: -0.002,
             min: -0.5,
             max: 0.5,
             step: 0.001,
@@ -1413,7 +1416,7 @@
             label: 'Font size (cm)',
             varName: '--a4-unit-font-size',
             unit: 'cm',
-            default: 0.651,
+            default: 0.851,
             min: 0,
             max: 5,
             step: 0.001,
@@ -1437,7 +1440,7 @@
             label: 'Margin top (cm)',
             varName: '--a4-unit-margin-top',
             unit: 'cm',
-            default: 1.32,
+            default: 2.32,
             min: -5,
             max: 15,
             step: 0.01,
@@ -1449,7 +1452,7 @@
             label: 'Font size (cm)',
             varName: '--a4-end-font-size',
             unit: 'cm',
-            default: 0.382,
+            default: 0.462,
             min: 0,
             max: 3,
             step: 0.001,
@@ -1526,6 +1529,18 @@
             max: 20,
             step: 0.01,
             decimals: 3,
+          },
+          {
+            id: 'a4ProductTranslateX',
+            group: 'Product description',
+            label: 'Horizontal offset (cm)',
+            varName: '--a4-product-translate-x',
+            unit: 'cm',
+            default: 0,
+            min: -10,
+            max: 10,
+            step: 0.01,
+            decimals: 2,
           },
         ];
         let previewVisible = false;
