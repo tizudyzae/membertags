@@ -104,10 +104,12 @@
       }
 
       body[data-paper-size='a4-single'] {
-        --page-padding-top: 2.6cm;
-        --page-padding-right: 2.4cm;
-        --page-padding-bottom: 2.6cm;
-        --page-padding-left: 2.4cm;
+        --page-padding-top: 2.75cm;
+        --page-padding-right: 2.6cm;
+        --page-padding-bottom: 2.9cm;
+        --page-padding-left: 2.6cm;
+        --body-font: 'Avenir Next', 'Avenir Next Regular', 'Avenir Next LT Pro', 'Avenir',
+          'Helvetica Neue', Arial, sans-serif;
         --column-gap: 0cm;
         --row-gap: 0cm;
         --tag-width: calc(var(--page-width) - var(--page-padding-left) - var(--page-padding-right));
@@ -592,61 +594,65 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: space-between;
-        padding: 2.6cm 2.2cm 2.4cm;
+        justify-content: flex-start;
+        padding: 3cm 2.8cm 3.2cm;
         background: #ffffff;
-        border-radius: 26px;
-        border: 1px solid rgba(15, 23, 42, 0.12);
-        box-shadow: 0 24px 55px -18px rgba(15, 23, 42, 0.3);
+        border-radius: 28px;
+        border: none;
+        box-shadow: none;
         overflow: visible;
+        gap: 2.2cm;
       }
 
       body[data-paper-size='a4-single'] .label-card {
         background: transparent;
         color: inherit;
         padding: 0;
-        gap: 1.35cm;
+        gap: 1.6cm;
         text-align: center;
         align-items: center;
       }
 
       body[data-paper-size='a4-single'] .label-card-body {
-        gap: 1.35cm;
+        gap: 1.25cm;
         align-items: center;
         justify-content: center;
       }
 
       body[data-paper-size='a4-single'] .tag-heading {
-        font-family: 'Impact', 'Barlow Condensed', 'Arial Black', sans-serif;
-        font-size: 2.8cm;
+        font-family: var(--heading-font);
+        font-size: 2.85cm;
         letter-spacing: 0.08em;
         text-transform: none;
         font-weight: 700;
+        line-height: 1;
       }
 
       body[data-paper-size='a4-single'] .price {
-        font-size: 9cm;
+        font-size: 9.4cm;
         line-height: 0.9;
         letter-spacing: -0.02em;
+        font-weight: 700;
       }
 
       body[data-paper-size='a4-single'] .unit-line {
         font-family: var(--body-font);
-        font-size: 1.1cm;
+        font-size: 1.15cm;
         font-style: normal;
         color: #111827;
-        gap: 0.2cm;
+        gap: 0.35cm;
         flex-wrap: wrap;
         justify-content: center;
+        letter-spacing: 0.01em;
       }
 
       body[data-paper-size='a4-single'] .unit-line::before {
         content: 'Equivalent price';
-        font-weight: 500;
+        font-weight: 400;
       }
 
       body[data-paper-size='a4-single'] .unit-line span {
-        font-weight: 600;
+        font-weight: 400;
       }
 
       body[data-paper-size='a4-single'] .unit-separator {
@@ -659,23 +665,23 @@
         color: #111827;
         border-radius: 0;
         padding: 0;
-        font-size: 0.95cm;
-        letter-spacing: 0.01em;
+        font-size: 1cm;
+        letter-spacing: 0.02em;
         font-style: normal;
-        gap: 0.3cm;
+        gap: 0.35cm;
         flex-wrap: wrap;
         justify-content: center;
       }
 
       body[data-paper-size='a4-single'] .expiry-label {
-        font-weight: 500;
+        font-weight: 400;
         text-transform: none;
       }
 
       body[data-paper-size='a4-single'] .expiry-date {
         font-size: inherit;
-        letter-spacing: 0.01em;
-        font-weight: 600;
+        letter-spacing: 0.02em;
+        font-weight: 500;
       }
 
       body[data-paper-size='a4-single'] .label-blank {
@@ -685,13 +691,15 @@
         display: flex;
         align-items: flex-end;
         justify-content: center;
+        margin-top: auto;
       }
 
       body[data-paper-size='a4-single'] .product-name {
-        font-size: 1.4cm;
-        letter-spacing: 0.01em;
+        font-family: var(--body-font);
+        font-size: 1.65cm;
+        letter-spacing: 0.015em;
         color: #111827;
-        font-weight: 600;
+        font-weight: 400;
       }
 
       .label.is-placeholder {
