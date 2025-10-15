@@ -114,19 +114,19 @@
       }
 
       body[data-paper-size='a4-single'] {
-        --page-padding-top: 2.75cm;
-        --page-padding-right: 2.6cm;
-        --page-padding-bottom: 2.9cm;
-        --page-padding-left: 2.6cm;
+        --page-padding-top: 2.525cm;
+        --page-padding-right: 2.39cm;
+        --page-padding-bottom: 4.275cm;
+        --page-padding-left: 2.442cm;
         --body-font: 'Avenir Next', 'Avenir Next Regular', 'Avenir Next LT Pro', 'Avenir',
           'Helvetica Neue', Arial, sans-serif;
         --column-gap: 0cm;
         --row-gap: 0cm;
-        --tag-width: calc(var(--page-width) - var(--page-padding-left) - var(--page-padding-right));
+        --tag-width: 16.42cm;
         --tag-width-first: var(--tag-width);
         --tag-width-second: var(--tag-width);
         --column-template: var(--tag-width-first);
-        --tag-height: calc(var(--page-height) - var(--page-padding-top) - var(--page-padding-bottom));
+        --tag-height: 22.9cm;
         --tag-bg: #ffffff;
         --tag-text: #111827;
         --heading-height-scale: 1;
@@ -134,7 +134,7 @@
         --unit-height-scale: 1;
         --expiry-height-scale: 1;
         --product-name-scale: 1.1;
-        --tag-heading-size: 3.1cm;
+        --tag-heading-size: 3.175cm;
       }
 
       body[data-layout-mode='full-bleed']:not([data-paper-size='a4-single']) {
@@ -600,34 +600,36 @@
       }
 
       body[data-paper-size='a4-single'] .label {
+        width: var(--tag-width);
         max-width: 100%;
         height: var(--tag-height);
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: flex-start;
-        padding: 3cm 2.8cm 3.2cm;
+        padding: 0;
         background: #ffffff;
-        border-radius: 28px;
+        border-radius: 0;
         border: none;
         box-shadow: none;
         overflow: visible;
-        gap: 2.2cm;
+        gap: 0;
       }
 
       body[data-paper-size='a4-single'] .label-card {
         background: transparent;
         color: inherit;
         padding: 0;
-        gap: 1.6cm;
+        gap: 0;
         text-align: center;
         align-items: center;
       }
 
       body[data-paper-size='a4-single'] .label-card-body {
-        gap: 1.25cm;
+        width: 100%;
+        gap: 0;
         align-items: center;
-        justify-content: center;
+        justify-content: flex-start;
       }
 
       body[data-paper-size='a4-single'] .tag-heading {
@@ -636,25 +638,30 @@
         letter-spacing: 0.06em;
         text-transform: none;
         font-weight: 700;
-        line-height: 1;
+        line-height: 1.095;
+        margin: 0;
+        margin-bottom: 2.93cm;
       }
 
       body[data-paper-size='a4-single'] .price {
-        font-size: 9.4cm;
-        line-height: 0.9;
+        font-size: 6.1736cm;
+        line-height: 1;
         letter-spacing: -0.02em;
         font-weight: 700;
+        margin: 0;
       }
 
       body[data-paper-size='a4-single'] .unit-line {
         font-family: var(--body-font);
-        font-size: 1.15cm;
+        font-size: 0.6174cm;
         font-style: normal;
         color: #111827;
         gap: 0.35cm;
         flex-wrap: wrap;
         justify-content: center;
         letter-spacing: 0.01em;
+        margin-top: 1.97cm;
+        margin-bottom: 0;
       }
 
       body[data-paper-size='a4-single'] .unit-line::before {
@@ -671,17 +678,18 @@
       }
 
       body[data-paper-size='a4-single'] .expiry-pill {
-        margin-top: 1.6cm;
+        margin-top: 1.343cm;
         background: transparent;
         color: #111827;
         border-radius: 0;
         padding: 0;
-        font-size: 1cm;
+        font-size: 0.4233cm;
         letter-spacing: 0.02em;
         font-style: normal;
         gap: 0.35cm;
         flex-wrap: wrap;
         justify-content: center;
+        margin-bottom: 0;
       }
 
       body[data-paper-size='a4-single'] .expiry-label {
@@ -700,17 +708,18 @@
         padding: 0;
         width: 100%;
         display: flex;
-        align-items: flex-end;
+        align-items: center;
         justify-content: center;
-        margin-top: auto;
+        margin-top: 3.439cm;
       }
 
       body[data-paper-size='a4-single'] .product-name {
         font-family: var(--body-font);
-        font-size: 1.65cm;
+        font-size: 0.6174cm;
         letter-spacing: 0.015em;
         color: #111827;
         font-weight: 400;
+        margin: 0;
       }
 
       .label.is-placeholder {
