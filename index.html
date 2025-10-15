@@ -103,13 +103,34 @@
         --product-name-scale: 0.8;
       }
 
-      body[data-layout-mode='full-bleed'] {
+      body[data-paper-size='a4-single'] {
+        --page-padding-top: 2.6cm;
+        --page-padding-right: 2.4cm;
+        --page-padding-bottom: 2.6cm;
+        --page-padding-left: 2.4cm;
+        --column-gap: 0cm;
+        --row-gap: 0cm;
+        --tag-width: calc(var(--page-width) - var(--page-padding-left) - var(--page-padding-right));
+        --tag-width-first: var(--tag-width);
+        --tag-width-second: var(--tag-width);
+        --column-template: var(--tag-width-first);
+        --tag-height: calc(var(--page-height) - var(--page-padding-top) - var(--page-padding-bottom));
+        --tag-bg: #ffffff;
+        --tag-text: #111827;
+        --heading-height-scale: 1;
+        --price-scale: 1;
+        --unit-height-scale: 1;
+        --expiry-height-scale: 1;
+        --product-name-scale: 1.1;
+      }
+
+      body[data-layout-mode='full-bleed']:not([data-paper-size='a4-single']) {
         --layout-offset: 0cm;
         --page-padding-left: 0cm;
         --tag-width-first: var(--tag-width);
       }
 
-      body[data-layout-mode='hp-offset'] {
+      body[data-layout-mode='hp-offset']:not([data-paper-size='a4-single']) {
         --layout-offset: 0.5cm;
         --page-padding-left: var(--layout-offset);
         --tag-width-first: calc(var(--tag-width) - var(--layout-offset));
@@ -559,6 +580,120 @@
         overflow: hidden;
       }
 
+      body[data-paper-size='a4-single'] .label-grid {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      body[data-paper-size='a4-single'] .label {
+        max-width: 100%;
+        height: var(--tag-height);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+        padding: 2.6cm 2.2cm 2.4cm;
+        background: #ffffff;
+        border-radius: 26px;
+        border: 1px solid rgba(15, 23, 42, 0.12);
+        box-shadow: 0 24px 55px -18px rgba(15, 23, 42, 0.3);
+        overflow: visible;
+      }
+
+      body[data-paper-size='a4-single'] .label-card {
+        background: transparent;
+        color: inherit;
+        padding: 0;
+        gap: 1.35cm;
+        text-align: center;
+        align-items: center;
+      }
+
+      body[data-paper-size='a4-single'] .label-card-body {
+        gap: 1.35cm;
+        align-items: center;
+        justify-content: center;
+      }
+
+      body[data-paper-size='a4-single'] .tag-heading {
+        font-family: 'Impact', 'Barlow Condensed', 'Arial Black', sans-serif;
+        font-size: 2.8cm;
+        letter-spacing: 0.08em;
+        text-transform: none;
+        font-weight: 700;
+      }
+
+      body[data-paper-size='a4-single'] .price {
+        font-size: 9cm;
+        line-height: 0.9;
+        letter-spacing: -0.02em;
+      }
+
+      body[data-paper-size='a4-single'] .unit-line {
+        font-family: var(--body-font);
+        font-size: 1.1cm;
+        font-style: normal;
+        color: #111827;
+        gap: 0.2cm;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      body[data-paper-size='a4-single'] .unit-line::before {
+        content: 'Equivalent price';
+        font-weight: 500;
+      }
+
+      body[data-paper-size='a4-single'] .unit-line span {
+        font-weight: 600;
+      }
+
+      body[data-paper-size='a4-single'] .unit-separator {
+        text-transform: none;
+      }
+
+      body[data-paper-size='a4-single'] .expiry-pill {
+        margin-top: 1.6cm;
+        background: transparent;
+        color: #111827;
+        border-radius: 0;
+        padding: 0;
+        font-size: 0.95cm;
+        letter-spacing: 0.01em;
+        font-style: normal;
+        gap: 0.3cm;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      body[data-paper-size='a4-single'] .expiry-label {
+        font-weight: 500;
+        text-transform: none;
+      }
+
+      body[data-paper-size='a4-single'] .expiry-date {
+        font-size: inherit;
+        letter-spacing: 0.01em;
+        font-weight: 600;
+      }
+
+      body[data-paper-size='a4-single'] .label-blank {
+        background: transparent;
+        padding: 0;
+        width: 100%;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+      }
+
+      body[data-paper-size='a4-single'] .product-name {
+        font-size: 1.4cm;
+        letter-spacing: 0.01em;
+        color: #111827;
+        font-weight: 600;
+      }
+
       .label.is-placeholder {
         visibility: hidden;
         pointer-events: none;
@@ -825,6 +960,7 @@
               <select id="paperSize" name="paperSize" class="layout-mode-select">
                 <option value="large" selected>Large SEL (2 × 7)</option>
                 <option value="normal">Normal SEL (3 × 7)</option>
+                <option value="a4-single">A4 Single (1 × 1)</option>
               </select>
             </div>
             <div class="layout-mode-control">
@@ -870,6 +1006,7 @@
         const PAPER_SIZES = {
           large: { rows: 7, columns: 2 },
           normal: { rows: 7, columns: 3 },
+          'a4-single': { rows: 1, columns: 1 },
         };
         const DEFAULT_PAPER_SIZE = 'large';
         const PAPER_SIZE_KEYS = Object.keys(PAPER_SIZES);
@@ -923,6 +1060,9 @@
         const layoutModeSelect = document.getElementById('layoutMode');
         const previewWrapper = document.getElementById('previewWrapper');
         const previewToggleButton = document.getElementById('togglePreview');
+        const hpOffsetOption = layoutModeSelect
+          ? layoutModeSelect.querySelector('option[value="hp-offset"]')
+          : null;
         let previewVisible = false;
         let currentLayoutMode = null;
         let currentPaperSize = DEFAULT_PAPER_SIZE;
@@ -1044,7 +1184,7 @@
                 </div>
               </div>
               <div class="expiry-pill" data-role="expiry" data-empty="true" aria-hidden="true">
-                <span class="expiry-label">Ends</span>
+                <span class="expiry-label" data-role="expiry-label">Ends</span>
                 <span class="expiry-date" data-role="end-date" data-empty="true">${placeholders.endDate}</span>
               </div>
             </div>
@@ -1060,6 +1200,7 @@
           const unitLineEl = label.querySelector('[data-role="unit-line"]');
           const expiryEl = label.querySelector('[data-role="end-date"]');
           const expiryPill = label.querySelector('[data-role="expiry"]');
+          const expiryLabelEl = label.querySelector('[data-role="expiry-label"]');
           labelGrid.appendChild(label);
           labelRefs[index] = {
             label,
@@ -1071,6 +1212,7 @@
             unitLineEl,
             expiryEl,
             expiryPill,
+            expiryLabelEl,
           };
         }
 
@@ -1157,6 +1299,7 @@
           const dataIndex = getLabelDataIndex(index);
           const isPlaceholder = dataIndex === null;
           const isWithinGrid = index < maxSlotCount;
+          const activeDisplay = document.body?.dataset?.paperSize === 'a4-single' ? 'flex' : 'grid';
 
           refs.label.classList.toggle('is-placeholder', Boolean(isPlaceholder));
 
@@ -1167,7 +1310,7 @@
           }
 
           if (isPlaceholder) {
-            refs.label.style.display = 'grid';
+            refs.label.style.display = activeDisplay;
             refs.label.setAttribute('aria-hidden', 'true');
             return;
           }
@@ -1179,8 +1322,16 @@
             return;
           }
 
-          refs.label.style.display = 'grid';
+          refs.label.style.display = activeDisplay;
           refs.label.setAttribute('aria-hidden', 'false');
+
+          if (refs.expiryLabelEl) {
+            const paperSize = document.body?.dataset?.paperSize || '';
+            const expiryLabelText = paperSize === 'a4-single' ? 'Offer end date' : 'Ends';
+            if (refs.expiryLabelEl.textContent !== expiryLabelText) {
+              refs.expiryLabelEl.textContent = expiryLabelText;
+            }
+          }
 
           const data = tagData[dataIndex] || {};
           setText(refs.productNameEl, data.productName, placeholders.productName);
@@ -1219,6 +1370,14 @@
 
           currentPaperSize = normalized;
 
+          if (hpOffsetOption) {
+            hpOffsetOption.disabled = normalized === 'a4-single';
+          }
+
+          if (normalized === 'a4-single' && getActiveLayoutMode() === LAYOUT_MODES.HP_OFFSET) {
+            applyLayoutMode(LAYOUT_MODES.FULL_BLEED);
+          }
+
           if (document.body && document.body.dataset.paperSize !== normalized) {
             document.body.dataset.paperSize = normalized;
           }
@@ -1242,7 +1401,11 @@
         }
 
         function applyLayoutMode(nextMode) {
-          const normalized = normalizeLayoutMode(nextMode);
+          let normalized = normalizeLayoutMode(nextMode);
+
+          if (currentPaperSize === 'a4-single' && normalized === LAYOUT_MODES.HP_OFFSET) {
+            normalized = LAYOUT_MODES.FULL_BLEED;
+          }
 
           if (document.body && document.body.dataset.layoutMode !== normalized) {
             document.body.dataset.layoutMode = normalized;
